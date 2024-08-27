@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'Custom_Widgets/counter.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'app.dart';
+import 'login.dart';
 
 void main() {
   runApp(const MyApp());
@@ -9,70 +11,50 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: 'My app', // used by the OS task switcher
-      home: Scaffold(
-        body: SafeArea(
-          child: Counter(),
-        ),
-        backgroundColor: Color(0xfffef7ff),
-      ),
+    return MaterialApp(
+      title: 'Auth Flow Demo',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: const SplashScreen(),
     );
   }
 }
 
-class MyAppBar extends StatelessWidget {
-  const MyAppBar({required this.title, super.key});
-
-  final Widget title;
-
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 56,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      decoration: BoxDecoration(color: Colors.blue[500]),
-      child: Row(
-        children: [
-          const IconButton(
-            icon: Icon(Icons.menu),
-            tooltip: 'Navigation menu',
-            onPressed: null,
-          ),
-          Expanded(
-            child: title,
-          ),
-          const IconButton(
-            icon: Icon(Icons.search),
-            tooltip: 'Search',
-            onPressed: null,
-          ),
-        ],
-      ),
-    );
-  }
+  SplashScreenState createState() => SplashScreenState();
 }
 
-class MyScaffold extends StatelessWidget {
-  const MyScaffold({super.key});
+class SplashScreenState extends State<SplashScreen> {
+  final _storage = const FlutterSecureStorage();
+
+  @override
+  void initState() {
+    super.initState();
+    _checkAuthentication();
+  }
+
+  Future<void> _checkAuthentication() async {
+    String? userCred = await _storage.read(key: 'user_cred');
+
+    if (userCred != null) {
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const AppScreen()),
+      );
+    } else {
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      child: Column(
-        children: [
-          MyAppBar(
-            title: Text(
-              'Example title',
-              style: Theme.of(context).primaryTextTheme.titleLarge,
-            ),
-          ),
-          const Expanded(
-            child: Center(
-              child: Text('Hello, Michi!'),
-            ),
-          ),
-        ],
+    return const Scaffold(
+      body: Center(
+        child: CircularProgressIndicator(),
       ),
     );
   }

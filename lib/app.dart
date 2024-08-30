@@ -1,20 +1,24 @@
 import 'package:flutter/material.dart';
+import 'Screens/_1home.dart';
+import 'Screens/_4profile.dart';
+import 'Screens/_2search.dart';
 
 class AppScreen extends StatefulWidget {
   const AppScreen({super.key});
 
   @override
-  _AppScreenState createState() => _AppScreenState();
+  AppScreenState createState() => AppScreenState();
 }
 
-class _AppScreenState extends State<AppScreen> {
+class AppScreenState extends State<AppScreen> {
   int _selectedIndex = 0;
 
+  // List of pages
   static const List<Widget> _widgetOptions = <Widget>[
-    Text('Home Page'),
-    Text('Search Page'),
+    HomeScreen(),
+    SearchScreen(),
     Text('Cart Page'),
-    Text('Profile Page'),
+    ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -26,9 +30,11 @@ class _AppScreenState extends State<AppScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('App Screen')),
-      body: Center(
-        child: _widgetOptions.elementAt(_selectedIndex),
+      appBar: AppBar(title: const Text('App Navigation Example')),
+      body: IndexedStack(
+        index:
+            _selectedIndex, // Use IndexedStack to maintain the state of each screen
+        children: _widgetOptions,
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
@@ -50,7 +56,7 @@ class _AppScreenState extends State<AppScreen> {
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.blue,
+        selectedItemColor: const Color.fromARGB(255, 243, 65, 33),
         unselectedItemColor: Colors.grey,
         showUnselectedLabels: true,
         onTap: _onItemTapped,

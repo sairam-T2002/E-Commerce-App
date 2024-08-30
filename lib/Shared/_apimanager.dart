@@ -1,26 +1,11 @@
 import 'dart:convert';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
-
-class UserDataHelper {
-  static const _storage = FlutterSecureStorage();
-
-  static Future<Map<String, dynamic>?> getUserData(String key) async {
-    String? jsonString = await _storage.read(key: key);
-    return jsonString != null ? jsonDecode(jsonString) : null;
-  }
-
-  static Future<void> storeUserData(
-      String key, Map<String, dynamic> data) async {
-    String jsonString = jsonEncode(data);
-    await _storage.write(key: key, value: jsonString);
-  }
-}
+import '_localstorage.dart';
 
 const String baseUrl = 'http://10.0.5.38:5085/';
 
 Future<Map<String, dynamic>?> getUserCredentials() async {
-  return await UserDataHelper.getUserData('user_info_cred');
+  return await UserDataHelper.getUserData('user_cred');
 }
 
 Future<Map<String, dynamic>?> fetchApiGET(

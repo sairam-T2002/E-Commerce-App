@@ -1,0 +1,32 @@
+class ProductDto {
+  int? prdId;
+  String? name;
+  bool? isVeg;
+  bool? isBestSeller;
+  int? price;
+  int? imageSrl;
+  int? categoryId;
+  String? imgUrl;
+  int? stockCount;
+  double? rating;
+  String? description;
+  ProductDto(
+      {this.prdId,
+      this.name,
+      this.isVeg,
+      this.isBestSeller,
+      this.price,
+      this.imageSrl,
+      this.categoryId,
+      this.imgUrl,
+      this.stockCount,
+      this.rating,
+      this.description});
+}
+
+class CategoryDto {
+  int? categoryId;
+  String? name;
+  String? imgUrl;
+  CategoryDto({this.categoryId, this.name, this.imgUrl});
+}

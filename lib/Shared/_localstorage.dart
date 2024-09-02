@@ -19,3 +19,7 @@ class UserDataHelper {
     await _storage.delete(key: key);
   }
 }
+
+class LocalStorageKeys {
+  static String userCred = 'user_cred';
+}

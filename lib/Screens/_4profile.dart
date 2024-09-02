@@ -16,7 +16,7 @@ class ProfileState extends State<ProfileScreen> {
     setState(() {
       _isLoading = true;
     });
-    await UserDataHelper.deleteUserData('user_cred');
+    await UserDataHelper.deleteUserData(LocalStorageKeys.userCred);
     setState(() {
       _isLoading = false;
     });

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'dart:convert';
 import 'Shared/_apimanager.dart';
 import 'app.dart';
+import 'Shared/_localstorage.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -11,7 +10,6 @@ class LoginScreen extends StatefulWidget {
 }
 
 class LoginScreenState extends State<LoginScreen> {
-  final _storage = const FlutterSecureStorage();
   final _formKey = GlobalKey<FormState>();
   String _username = '';
   String _password = '';
@@ -36,7 +34,7 @@ class LoginScreenState extends State<LoginScreen> {
       });
       if (response != null && response.containsKey('accessToken')) {
         response['Username'] = userCred['Username'];
-        await _storage.write(key: 'user_cred', value: json.encode(response));
+        await UserDataHelper.storeUserData(LocalStorageKeys.userCred, response);
         if (!mounted) return;
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const AppScreen()),

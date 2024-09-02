@@ -14,12 +14,12 @@ class ProductCard extends StatefulWidget {
 class CardState extends State<ProductCard> {
   late bool _isVegan;
   late bool _isBestSeller;
+  late int? _productId;
   late String _productName;
   late String _productDescription;
   late double _review;
   late int _price;
   late String _imgUrl;
-  final GlobalState globalState = GlobalState();
 
   @override
   void initState() {
@@ -32,6 +32,7 @@ class CardState extends State<ProductCard> {
       _isVegan = widget.product.isVeg ?? false;
       _isBestSeller = widget.product.isBestSeller ?? false;
       _productName = widget.product.name ?? '';
+      _productId = widget.product.prdId;
       _productDescription = widget.product.description ?? '';
       _review = widget.product.rating ?? 0.0;
       _price = widget.product.price ?? 0;
@@ -171,12 +172,12 @@ class CardState extends State<ProductCard> {
                           fit: BoxFit.cover,
                         ),
                       ),
-                      const Positioned(
+                      Positioned(
                         bottom: -6,
                         left: 0,
                         right: 0,
                         child: Center(
-                          child: CardActions(),
+                          child: CardActions(productId: _productId),
                         ),
                       ),
                     ],
@@ -192,7 +193,8 @@ class CardState extends State<ProductCard> {
 }
 
 class CardActions extends StatefulWidget {
-  const CardActions({super.key});
+  final int? productId;
+  const CardActions({super.key, this.productId});
 
   @override
   ActionsState createState() => ActionsState();
@@ -200,6 +202,17 @@ class CardActions extends StatefulWidget {
 
 class ActionsState extends State<CardActions> {
   int _count = 0;
+  final GlobalState globalState = GlobalState();
+
+  @override
+  void initState() {
+    super.initState();
+    // if(globalState.cart.any((item)=>item.prdId == widget.productId)){
+    //   setState(() {
+    //     _count = globalState.cart.firstWhere((item)=> item.prdId == widget.productId)
+    //   });
+    // }
+  }
 
   void _handleAddToCart() {
     setState(() {

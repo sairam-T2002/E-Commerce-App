@@ -5,17 +5,21 @@ import '_localstorage.dart';
 const String baseUrl = 'http://10.0.5.38:5085/';
 
 Future<Map<String, dynamic>?> getUserCredentials() async {
-  return await UserDataHelper.getUserData('user_cred');
+  return await UserDataHelper.getUserData(LocalStorageKeys.userCred);
 }
 
 Future<Map<String, dynamic>?> fetchApiGET(
-    String endpoint, Map<String, String> params) async {
+    String endpoint, Map<String, String>? params) async {
   Map<String, dynamic>? usr = await getUserCredentials();
   if (usr == null) {
     return null;
   }
-
-  Uri url = Uri.parse(baseUrl + endpoint).replace(queryParameters: params);
+  Uri url;
+  if (params != null) {
+    url = Uri.parse(baseUrl + endpoint).replace(queryParameters: params);
+  } else {
+    url = Uri.parse(baseUrl + endpoint);
+  }
 
   try {
     http.Response response = await http.get(
@@ -84,7 +88,7 @@ Future<Map<String, dynamic>?> appRefreshToken(
 
     Map<String, dynamic>? usr = await getUserCredentials();
     if (usr != null) {
-      await UserDataHelper.storeUserData('user_info_cred', {
+      await UserDataHelper.storeUserData(LocalStorageKeys.userCred, {
         ...usr,
         'accessToken': data['AccessToken'],
         'refreshToken': data['RefreshToken']

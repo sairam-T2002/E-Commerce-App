@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'app.dart';
 import 'login.dart';
+import 'Shared/_localstorage.dart';
 
 void main() {
   runApp(const MyApp());
@@ -26,8 +26,6 @@ class SplashScreen extends StatefulWidget {
 }
 
 class SplashScreenState extends State<SplashScreen> {
-  final _storage = const FlutterSecureStorage();
-
   @override
   void initState() {
     super.initState();
@@ -35,9 +33,10 @@ class SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _checkAuthentication() async {
-    String? userCred = await _storage.read(key: 'user_cred');
+    Map<String, dynamic>? temp =
+        await UserDataHelper.getUserData(LocalStorageKeys.userCred);
 
-    if (userCred != null) {
+    if (temp != null && temp['refreshToken'] != null) {
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const AppScreen()),

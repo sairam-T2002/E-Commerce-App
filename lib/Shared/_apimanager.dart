@@ -88,11 +88,12 @@ Future<Map<String, dynamic>?> appRefreshToken(
 
     Map<String, dynamic>? usr = await getUserCredentials();
     if (usr != null) {
-      await UserDataHelper.storeUserData(LocalStorageKeys.userCred, {
-        ...usr,
-        'accessToken': data['AccessToken'],
-        'refreshToken': data['RefreshToken']
-      });
+      Map<String, String> temp = {
+        'username': usr['username'],
+        'accessToken': data['accessToken'],
+        'refreshToken': data['refreshToken']
+      };
+      await UserDataHelper.storeUserData(LocalStorageKeys.userCred, temp);
       return await callback();
     } else {
       throw Exception('User credentials could not be retrieved');

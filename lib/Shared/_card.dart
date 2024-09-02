@@ -177,7 +177,7 @@ class CardState extends State<ProductCard> {
                         left: 0,
                         right: 0,
                         child: Center(
-                          child: CardActions(productId: _productId),
+                          child: CardActions(product: widget.product),
                         ),
                       ),
                     ],
@@ -193,8 +193,8 @@ class CardState extends State<ProductCard> {
 }
 
 class CardActions extends StatefulWidget {
-  final int? productId;
-  const CardActions({super.key, this.productId});
+  final ProductDto product;
+  const CardActions({super.key, required this.product});
 
   @override
   ActionsState createState() => ActionsState();
@@ -207,23 +207,54 @@ class ActionsState extends State<CardActions> {
   @override
   void initState() {
     super.initState();
-    // if(globalState.cart.any((item)=>item.prdId == widget.productId)){
-    //   setState(() {
-    //     _count = globalState.cart.firstWhere((item)=> item.prdId == widget.productId)
-    //   });
-    // }
+    if (globalState.cart.isNotEmpty) {
+      _count = globalState.cart
+              .firstWhere((item) => item?.productId == widget.product.prdId,
+                  orElse: () => null)
+              ?.count ??
+          0;
+    } else {
+      _count = 0;
+    }
   }
 
   void _handleAddToCart() {
     setState(() {
-      _count = _count + 1;
+      _count++;
+      final existingItem = globalState.cart.firstWhere(
+        (item) => item?.productId == widget.product.prdId,
+        orElse: () => null,
+      );
+
+      if (existingItem != null) {
+        existingItem.count++;
+      } else {
+        globalState.cart.add(
+          ProductCart(
+            productName: widget.product.name ?? '',
+            productId: widget.product.prdId,
+            price: widget.product.price ?? 0,
+            categoryId: widget.product.categoryId ?? 0,
+            count: 1,
+          ),
+        );
+      }
     });
   }
 
   void _handleRemoveFromCart() {
     setState(() {
       if (_count > 0) {
-        _count = _count - 1;
+        _count--;
+        final existingItem = globalState.cart.firstWhere(
+            (item) => item?.productId == widget.product.prdId,
+            orElse: () => null);
+        if (existingItem != null) {
+          existingItem.count--;
+          if (existingItem.count == 0) {
+            globalState.cart.remove(existingItem);
+          }
+        }
       }
     });
   }

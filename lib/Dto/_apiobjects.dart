@@ -30,3 +30,13 @@ class CategoryDto {
   String? imgUrl;
   CategoryDto({this.categoryId, this.name, this.imgUrl});
 }
+
+class ApiCredentials {
+  String username;
+  String accessToken;
+  String refreshToken;
+  ApiCredentials(
+      {required this.username,
+      required this.accessToken,
+      required this.refreshToken});
+}

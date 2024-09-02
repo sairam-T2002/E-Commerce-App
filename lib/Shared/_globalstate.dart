@@ -1,5 +1,3 @@
-import 'package:my_app/Dto/_apiobjects.dart';
-
 class ProductCart {
   String productName;
   int? productId;

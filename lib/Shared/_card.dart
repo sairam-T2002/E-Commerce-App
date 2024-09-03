@@ -101,12 +101,18 @@ class CardState extends State<ProductCard> {
                                       const Color.fromARGB(255, 243, 226, 175),
                                 ),
                                 padding: const EdgeInsets.fromLTRB(8, 2, 8, 2),
-                                child: const Text(
-                                  'Best Seller!',
-                                  style: TextStyle(
-                                      color: Color.fromARGB(255, 56, 56, 56),
-                                      fontSize: 10),
-                                ),
+                                child: const Row(children: [
+                                  Icon(
+                                    Icons.fire_extinguisher,
+                                    color: Colors.amber,
+                                  ),
+                                  Text(
+                                    'Best Seller!',
+                                    style: TextStyle(
+                                        color: Color.fromARGB(255, 56, 56, 56),
+                                        fontSize: 10),
+                                  ),
+                                ]),
                               )
                           ],
                         ),

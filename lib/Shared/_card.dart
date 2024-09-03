@@ -113,9 +113,9 @@ class CardState extends State<ProductCard> {
                         Text(
                           _productName,
                           style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 20,
-                          ),
+                              fontWeight: FontWeight.w400,
+                              fontSize: 20,
+                              fontFamily: 'NerkoOne'),
                         ),
                         const SizedBox(height: 8),
                         Text(

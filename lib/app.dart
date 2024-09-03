@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'Screens/_1home.dart';
 import 'Screens/_4profile.dart';
 import 'Screens/_2search.dart';
+import 'Shared/_globalstate.dart';
 
 class AppScreen extends StatefulWidget {
   const AppScreen({super.key});
@@ -12,18 +13,35 @@ class AppScreen extends StatefulWidget {
 
 class AppScreenState extends State<AppScreen> {
   int _selectedIndex = 0;
+  final GlobalState globalState = GlobalState();
 
   // List of pages
-  static const List<Widget> _widgetOptions = <Widget>[
-    HomeScreen(),
-    SearchScreen(),
-    Text('Cart Page'),
-    ProfileScreen(),
-  ];
+  List<Widget> _widgetOptions = [];
+
+  void screenNavigationCallback(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    setState(() {
+      _widgetOptions = <Widget>[
+        HomeScreen(
+          callback: screenNavigationCallback,
+        ),
+        const SearchScreen(),
+        const Text('Cart Page'),
+        const ProfileScreen(),
+      ];
     });
   }
 
@@ -37,20 +55,28 @@ class AppScreenState extends State<AppScreen> {
         children: _widgetOptions,
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
+        items: <BottomNavigationBarItem>[
+          const BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.search),
             label: 'Search',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
+            icon: Badge(
+              backgroundColor: const Color.fromARGB(255, 243, 65, 33),
+              isLabelVisible: globalState.cart.isNotEmpty,
+              label: Text(
+                '${globalState.cart.length}', // Replace '3' with your cart count variable
+                style: const TextStyle(color: Colors.white, fontSize: 10),
+              ),
+              child: const Icon(Icons.shopping_cart),
+            ),
             label: 'Cart',
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Profile',
           ),

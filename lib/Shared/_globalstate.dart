@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class ProductCart {
   String productName;
   int? productId;
@@ -12,11 +14,15 @@ class ProductCart {
       required this.count});
 }
 
-class GlobalState {
+class GlobalState extends ChangeNotifier {
   static final GlobalState _instance = GlobalState._internal();
   GlobalState._internal();
   factory GlobalState() {
     return _instance;
   }
+  void updateUI() {
+    notifyListeners();
+  }
+
   List<ProductCart?> cart = [];
 }

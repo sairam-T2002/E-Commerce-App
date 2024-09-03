@@ -240,6 +240,7 @@ class ActionsState extends State<CardActions> {
         );
       }
     });
+    globalState.updateUI();
   }
 
   void _handleRemoveFromCart() {
@@ -255,6 +256,7 @@ class ActionsState extends State<CardActions> {
             globalState.cart.remove(existingItem);
           }
         }
+        globalState.updateUI();
       }
     });
   }

@@ -1,55 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../Dto/_apiobjects.dart';
 import '../Shared/_globalstate.dart';
 
-class ProductCard extends StatefulWidget {
+class ProductCardN extends ConsumerWidget {
   final ProductDto product;
-  const ProductCard({super.key, required this.product});
+
+  const ProductCardN({super.key, required this.product});
 
   @override
-  CardState createState() => CardState();
-}
-
-class CardState extends State<ProductCard> {
-  late bool _isVegan;
-  late bool _isBestSeller;
-  // late int? _productId;
-  late String _productName;
-  late String _productDescription;
-  late double _review;
-  late int _price;
-  late String _imgUrl;
-
-  @override
-  void initState() {
-    super.initState();
-    _updateProductData();
-  }
-
-  void _updateProductData() {
-    setState(() {
-      _isVegan = widget.product.isVeg ?? false;
-      _isBestSeller = widget.product.isBestSeller ?? false;
-      _productName = widget.product.name ?? '';
-      // _productId = widget.product.prdId;
-      _productDescription = widget.product.description ?? '';
-      _review = widget.product.rating ?? 0.0;
-      _price = widget.product.price ?? 0;
-      _imgUrl = widget.product.imgUrl ?? '';
-    });
-  }
-
-  @override
-  void didUpdateWidget(covariant ProductCard oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.product != oldWidget.product) {
-      _updateProductData();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return SizedBox(
@@ -79,7 +40,9 @@ class CardState extends State<ProductCard> {
                               height: 20,
                               decoration: BoxDecoration(
                                 border: Border.all(
-                                  color: _isVegan ? Colors.green : Colors.red,
+                                  color: product.isVeg ?? false
+                                      ? Colors.green
+                                      : Colors.red,
                                   width: 2.0,
                                 ),
                                 borderRadius: BorderRadius.circular(5),
@@ -87,13 +50,14 @@ class CardState extends State<ProductCard> {
                               child: Center(
                                 child: CircleAvatar(
                                   radius: 5,
-                                  backgroundColor:
-                                      _isVegan ? Colors.green : Colors.red,
+                                  backgroundColor: product.isVeg ?? false
+                                      ? Colors.green
+                                      : Colors.red,
                                 ),
                               ),
                             ),
                             const SizedBox(width: 8),
-                            if (_isBestSeller)
+                            if (product.isBestSeller ?? false)
                               Container(
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(10),
@@ -117,24 +81,24 @@ class CardState extends State<ProductCard> {
                           ],
                         ),
                         Text(
-                          _productName,
+                          product.name ?? '',
                           style: const TextStyle(
                               fontWeight: FontWeight.w400,
                               fontSize: 20,
                               fontFamily: 'NerkoOne'),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 5),
                         Text(
-                          _productDescription,
+                          product.description ?? '',
                           style: const TextStyle(fontSize: 8),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 5),
                         Row(
                           children: [
                             RatingBar.builder(
-                              initialRating: _review,
+                              initialRating: product.rating ?? 0.0,
                               minRating: 1,
                               direction: Axis.horizontal,
                               allowHalfRating: true,
@@ -156,9 +120,9 @@ class CardState extends State<ProductCard> {
                             )
                           ],
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 5),
                         Text(
-                          '₹$_price',
+                          '₹${product.price ?? 0}',
                           style: const TextStyle(
                             color: Color.fromARGB(255, 243, 65, 33),
                           ),
@@ -172,7 +136,7 @@ class CardState extends State<ProductCard> {
                       ClipRRect(
                         borderRadius: BorderRadius.circular(10),
                         child: Image.network(
-                          _imgUrl,
+                          product.imgUrl ?? '',
                           width: 150,
                           height: 150,
                           fit: BoxFit.cover,
@@ -183,7 +147,7 @@ class CardState extends State<ProductCard> {
                         left: 0,
                         right: 0,
                         child: Center(
-                          child: CardActions(product: widget.product),
+                          child: CardActionsN(product: product),
                         ),
                       ),
                     ],
@@ -198,86 +162,37 @@ class CardState extends State<ProductCard> {
   }
 }
 
-class CardActions extends StatefulWidget {
+class CardActionsN extends ConsumerWidget {
   final ProductDto product;
-  const CardActions({super.key, required this.product});
+  const CardActionsN({super.key, required this.product});
 
   @override
-  ActionsState createState() => ActionsState();
-}
-
-class ActionsState extends State<CardActions> {
-  int _count = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    if ([].isNotEmpty) {
-      _count = []
-              .firstWhere((item) => item?.productId == widget.product.prdId,
-                  orElse: () => null)
-              ?.count ??
-          0;
-    } else {
-      _count = 0;
-    }
-  }
-
-  void _handleAddToCart() {
-    setState(() {
-      _count++;
-      final existingItem = [].firstWhere(
-        (item) => item?.productId == widget.product.prdId,
-        orElse: () => null,
-      );
-
-      if (existingItem != null) {
-        existingItem.count++;
-      } else {
-        [].add(
-          ProductCart(
-            productName: widget.product.name ?? '',
-            productId: widget.product.prdId,
-            price: widget.product.price ?? 0,
-            categoryId: widget.product.categoryId ?? 0,
-            count: 1,
-          ),
-        );
-      }
-    });
-  }
-
-  void _handleRemoveFromCart() {
-    setState(() {
-      if (_count > 0) {
-        _count--;
-        final existingItem = [].firstWhere(
-            (item) => item?.productId == widget.product.prdId,
-            orElse: () => null);
-        if (existingItem != null) {
-          existingItem.count--;
-          if (existingItem.count == 0) {
-            [].remove(existingItem);
-          }
-        }
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     const double width = 120.0;
     const double height = 40.0;
     const Color backgroundColor = Color.fromARGB(255, 243, 65, 33);
 
-    if (_count == 0) {
+    final cartItems = ref.watch(cartProvider);
+    final cartItem = cartItems.firstWhere(
+      (item) => item.productId == product.prdId,
+      orElse: () => ProductCart(
+          productName: '', productId: null, price: 0, categoryId: 0, count: 0),
+    );
+
+    if (cartItem.count == 0) {
       return SizedBox(
         width: width,
         height: height,
         child: ElevatedButton(
-          onPressed: _handleAddToCart,
+          onPressed: () {
+            ref.read(cartProvider.notifier).addToCart(ProductCart(
+                productName: product.name ?? '',
+                productId: product.prdId,
+                price: product.price ?? 0,
+                categoryId: 0, // Assuming category ID, adjust as needed
+                count: 1));
+          },
           style: ElevatedButton.styleFrom(
-            // elevation: 4,
             backgroundColor: backgroundColor,
             foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(
@@ -301,12 +216,24 @@ class ActionsState extends State<CardActions> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _buildActionButton('-', _handleRemoveFromCart),
+            _buildActionButton('-', () {
+              if (cartItem.count > 1) {
+                ref
+                    .read(cartProvider.notifier)
+                    .updateQuantity(product.prdId, cartItem.count - 1);
+              } else {
+                ref.read(cartProvider.notifier).removeFromCart(product.prdId);
+              }
+            }),
             Text(
-              '$_count',
+              '${cartItem.count}',
               style: const TextStyle(color: Colors.white, fontSize: 16),
             ),
-            _buildActionButton('+', _handleAddToCart),
+            _buildActionButton('+', () {
+              ref
+                  .read(cartProvider.notifier)
+                  .updateQuantity(product.prdId, cartItem.count + 1);
+            }),
           ],
         ),
       );

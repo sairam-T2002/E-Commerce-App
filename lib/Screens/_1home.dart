@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:my_app/Dto/_apiobjects.dart';
 import 'package:my_app/Shared/_apimanager.dart';
-import '../Shared/_card.dart';
+// import '../Shared/_card.dart';
+import '../Shared/_cardn.dart';
 import '../Shared/_slideshow.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -17,18 +18,21 @@ class HomeState extends State<HomeScreen> {
   double screenWidth = 0;
   List<Widget> _widgetsListFP = [];
   List<Widget> _widgetsListCT = [];
+  List<Widget> _widgetsListCA = [];
 
   Future<void> updateStateFromApi() async {
     Map<String, dynamic>? response =
         await fetchApiGET('api/AppData/GetHomePageData', null);
     List<Widget> tempFpList = [];
     List<Widget> tempCtList = [];
+    List<Widget> tempCaList = [];
     List<dynamic>? featuredPd = response?['featuredProducts'];
     List<dynamic>? categories = response?['categories'];
+    List<dynamic>? carosel = response?['carouselUrls'];
     if (featuredPd != null) {
       for (var item in featuredPd) {
         tempFpList.add(
-          ProductCard(
+          ProductCardN(
             product: ProductDto(
               prdId: item['product_Id'] ?? '',
               name: item['product_Name'] ?? '',
@@ -60,6 +64,20 @@ class HomeState extends State<HomeScreen> {
         ));
       }
     }
+    if (carosel != null) {
+      for (var item in carosel) {
+        tempCaList.add(Image.network(
+          item.isNotEmpty ? item : 'https://via.placeholder.com/80',
+          width: screenWidth,
+          height: 300,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            print(error);
+            return const Icon(Icons.error, size: 100);
+          },
+        ));
+      }
+    }
     setState(() {
       _widgetsListFP = tempFpList;
       _widgetsListCT = tempCtList;
@@ -78,6 +96,10 @@ class HomeState extends State<HomeScreen> {
     return SingleChildScrollView(
       child: Column(
         children: [
+          FirstSection(
+            screenWidth: screenWidth,
+            widgetsList: _widgetsListCA,
+          ),
           SecondSection(
             screenWidth: screenWidth,
             widgetList: _widgetsListCT,
@@ -90,6 +112,32 @@ class HomeState extends State<HomeScreen> {
             widgetList: _widgetsListFP,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class FirstSection extends StatefulWidget {
+  final double screenWidth;
+  final List<Widget> widgetsList;
+  const FirstSection(
+      {super.key, required this.screenWidth, required this.widgetsList});
+
+  @override
+  FirstSectionState createState() => FirstSectionState();
+}
+
+class FirstSectionState extends State<FirstSection> {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(10),
+      child: SizedBox(
+        width: widget.screenWidth,
+        height: 170,
+        child: AutoSlideshow(
+          children: widget.widgetsList,
+        ),
       ),
     );
   }
@@ -154,7 +202,7 @@ class SecondSectionState extends State<SecondSection> {
                       : widget.widgetList.isNotEmpty
                           ? widget.widgetList.length
                           : 1, // Fixed number of columns
-              crossAxisSpacing: 5, // Space between columns
+              crossAxisSpacing: 0, // Space between columns
               mainAxisSpacing: 60, // Space between rows
               mainAxisExtent: 100, // Fixed height of each item
             ),
@@ -267,7 +315,7 @@ class CategoryViewState extends State<CategoryView> {
                   width: containerWidth,
                   height: 90,
                   decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 255, 255, 255),
+                    color: const Color(0xfff7f2fa),
                     border: Border.all(
                       width: 1.0,
                       color: const Color.fromARGB(255, 243, 65, 33),

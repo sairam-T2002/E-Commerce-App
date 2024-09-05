@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'Screens/_1home.dart';
 import 'Screens/_4profile.dart';
 import 'Screens/_2search.dart';
 import 'Shared/_globalstate.dart';
 
-class AppScreen extends StatefulWidget {
+class AppScreen extends ConsumerStatefulWidget {
   const AppScreen({super.key});
 
   @override
-  AppScreenState createState() => AppScreenState();
+  ConsumerState<AppScreen> createState() => AppScreenState();
 }
 
-class AppScreenState extends State<AppScreen> {
+class AppScreenState extends ConsumerState<AppScreen> {
   int _selectedIndex = 0;
-  final GlobalState globalState = GlobalState();
 
   // List of pages
-  List<Widget> _widgetOptions = [];
+  late List<Widget> _widgetOptions;
 
   void screenNavigationCallback(int index) {
     setState(() {
@@ -33,25 +33,25 @@ class AppScreenState extends State<AppScreen> {
   @override
   void initState() {
     super.initState();
-    setState(() {
-      _widgetOptions = <Widget>[
-        HomeScreen(
-          callback: screenNavigationCallback,
-        ),
-        const SearchScreen(),
-        const Text('Cart Page'),
-        const ProfileScreen(),
-      ];
-    });
+    _widgetOptions = <Widget>[
+      HomeScreen(
+        callback: screenNavigationCallback,
+      ),
+      const SearchScreen(),
+      const Text('Cart Page'),
+      const ProfileScreen(),
+    ];
   }
 
   @override
   Widget build(BuildContext context) {
+    final cartItems = ref.watch(cartProvider);
+    final cartCount = cartItems.length;
+
     return Scaffold(
       appBar: AppBar(title: const Text('App Navigation Example')),
       body: IndexedStack(
-        index:
-            _selectedIndex, // Use IndexedStack to maintain the state of each screen
+        index: _selectedIndex,
         children: _widgetOptions,
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -67,9 +67,9 @@ class AppScreenState extends State<AppScreen> {
           BottomNavigationBarItem(
             icon: Badge(
               backgroundColor: const Color.fromARGB(255, 243, 65, 33),
-              isLabelVisible: globalState.cart.isNotEmpty,
+              isLabelVisible: cartCount > 0,
               label: Text(
-                '${globalState.cart.length}', // Replace '3' with your cart count variable
+                '$cartCount',
                 style: const TextStyle(color: Colors.white, fontSize: 10),
               ),
               child: const Icon(Icons.shopping_cart),

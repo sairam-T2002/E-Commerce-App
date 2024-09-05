@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ProductCart {
   String productName;
@@ -14,15 +14,36 @@ class ProductCart {
       required this.count});
 }
 
-class GlobalState extends ChangeNotifier {
-  static final GlobalState _instance = GlobalState._internal();
-  GlobalState._internal();
-  factory GlobalState() {
-    return _instance;
-  }
-  void updateUI() {
-    notifyListeners();
+class CartNotifier extends StateNotifier<List<ProductCart>> {
+  CartNotifier() : super([]);
+
+  void addToCart(ProductCart product) {
+    state = [...state, product];
   }
 
-  List<ProductCart?> cart = [];
+  void removeFromCart(int? productId) {
+    state = [
+      for (final product in state)
+        if (product.productId != productId) product,
+    ];
+  }
+
+  void updateQuantity(int? productId, int newCount) {
+    state = [
+      for (final product in state)
+        if (product.productId == productId)
+          ProductCart(
+            productName: product.productName,
+            productId: product.productId,
+            price: product.price,
+            categoryId: product.categoryId,
+            count: newCount,
+          )
+        else
+          product,
+    ];
+  }
 }
+
+final cartProvider = StateNotifierProvider<CartNotifier, List<ProductCart>>(
+    (ref) => CartNotifier());

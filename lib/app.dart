@@ -14,8 +14,6 @@ class AppScreen extends ConsumerStatefulWidget {
 
 class AppScreenState extends ConsumerState<AppScreen> {
   int _selectedIndex = 0;
-
-  // List of pages
   late List<Widget> _widgetOptions;
 
   void screenNavigationCallback(int index) {
@@ -28,6 +26,63 @@ class AppScreenState extends ConsumerState<AppScreen> {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  void _showDrawer() {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return GestureDetector(
+          onTap: () => Navigator.of(context).pop(),
+          child: Container(
+            color: const Color.fromRGBO(0, 0, 0, 0.5),
+            child: GestureDetector(
+              onTap: () {},
+              child: DraggableScrollableSheet(
+                initialChildSize: 0.6,
+                minChildSize: 0.2,
+                maxChildSize: 0.9,
+                builder: (_, controller) {
+                  return Container(
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(20)),
+                    ),
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 50,
+                          height: 5,
+                          margin: const EdgeInsets.symmetric(vertical: 10),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(2.5),
+                          ),
+                        ),
+                        Expanded(
+                          child: ListView(
+                            controller: controller,
+                            children: const [
+                              ListTile(title: Text('Drawer Item 1')),
+                              ListTile(title: Text('Drawer Item 2')),
+                              ListTile(title: Text('Drawer Item 3')),
+                              // Add more items as needed
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -49,7 +104,37 @@ class AppScreenState extends ConsumerState<AppScreen> {
     final cartCount = cartItems.length;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('App Navigation Example')),
+      appBar: AppBar(
+        elevation: 8,
+        backgroundColor: const Color.fromARGB(255, 221, 221, 221),
+        // leading: GestureDetector(
+        //   onTap: _showDrawer,
+        //   child: Container(
+        //     margin: const EdgeInsets.all(8),
+        //     decoration: BoxDecoration(
+        //       color: Colors.white,
+        //       borderRadius: BorderRadius.circular(8),
+        //     ),
+        //     child: const Column(
+        //       mainAxisAlignment: MainAxisAlignment.center,
+        //       children: [
+        //         Icon(Icons.place, color: Color.fromARGB(255, 243, 65, 33)),
+        //         Text('Select',
+        //             style: TextStyle(
+        //                 fontSize: 10, color: Color.fromARGB(255, 243, 65, 33))),
+        //       ],
+        //     ),
+        //   ),
+        // ),
+        title: const Text('Your App Title',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.place, color: Colors.white),
+            onPressed: _showDrawer,
+          ),
+        ],
+      ),
       body: IndexedStack(
         index: _selectedIndex,
         children: _widgetOptions,

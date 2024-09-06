@@ -19,8 +19,12 @@ class HomeState extends State<HomeScreen> {
   List<Widget> _widgetsListFP = [];
   List<Widget> _widgetsListCT = [];
   List<Widget> _widgetsListCA = [];
+  bool _isLoading = true;
 
   Future<void> updateStateFromApi() async {
+    setState(() {
+      _isLoading = true;
+    });
     Map<String, dynamic>? response =
         await fetchApiGET('api/AppData/GetHomePageData', null);
     List<Widget> tempFpList = [];
@@ -66,21 +70,28 @@ class HomeState extends State<HomeScreen> {
     }
     if (carosel != null) {
       for (var item in carosel) {
-        tempCaList.add(Image.network(
-          item.isNotEmpty ? item : 'https://via.placeholder.com/80',
-          width: screenWidth,
-          height: 300,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            print(error);
-            return const Icon(Icons.error, size: 100);
-          },
-        ));
+        tempCaList.add(
+          ClipRRect(
+            borderRadius: BorderRadius.circular(5),
+            child: Image.network(
+              item.isNotEmpty ? item : 'https://via.placeholder.com/80',
+              width: screenWidth,
+              height: 300,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                print(error);
+                return const Icon(Icons.error, size: 100);
+              },
+            ),
+          ),
+        );
       }
     }
     setState(() {
       _widgetsListFP = tempFpList;
       _widgetsListCT = tempCtList;
+      _widgetsListCA = tempCaList;
+      _isLoading = false;
     });
   }
 
@@ -93,27 +104,34 @@ class HomeState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     screenWidth = MediaQuery.of(context).size.width;
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          FirstSection(
-            screenWidth: screenWidth,
-            widgetsList: _widgetsListCA,
-          ),
-          SecondSection(
-            screenWidth: screenWidth,
-            widgetList: _widgetsListCT,
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          ThirdSection(
-            screenWidth: screenWidth,
-            widgetList: _widgetsListFP,
-          ),
-        ],
-      ),
-    );
+
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    } else {
+      return SingleChildScrollView(
+        child: Column(
+          children: [
+            FirstSection(
+              screenWidth: screenWidth,
+              widgetsList: _widgetsListCA,
+            ),
+            SecondSection(
+              screenWidth: screenWidth,
+              widgetList: _widgetsListCT,
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            ThirdSection(
+              screenWidth: screenWidth,
+              widgetList: _widgetsListFP,
+            ),
+          ],
+        ),
+      );
+    }
   }
 }
 

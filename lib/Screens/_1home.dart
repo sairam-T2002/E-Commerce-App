@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:my_app/Dto/_apiobjects.dart';
 import 'package:my_app/Shared/_apimanager.dart';
 // import '../Shared/_card.dart';
-import '../Shared/_cardn.dart';
+import '../Shared/_cardnew.dart';
 import '../Shared/_slideshow.dart';
 
 class HomeScreen extends StatefulWidget {
-  final void Function(int)? callback;
+  final void Function(int, String)? callback;
   const HomeScreen({super.key, this.callback});
 
   @override
@@ -79,7 +79,6 @@ class HomeState extends State<HomeScreen> {
               height: 300,
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) {
-                print(error);
                 return const Icon(Icons.error, size: 100);
               },
             ),
@@ -149,15 +148,35 @@ class FirstSectionState extends State<FirstSection> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(10),
-      child: SizedBox(
-        width: widget.screenWidth,
-        height: 170,
-        child: AutoSlideshow(
-          children: widget.widgetsList,
-        ),
-      ),
-    );
+        padding: const EdgeInsets.all(10),
+        child: Column(children: [
+          const Row(children: [
+            Icon(
+              Icons.recommend,
+              color: Color.fromARGB(255, 243, 65, 33),
+            ),
+            SizedBox(
+              width: 5,
+            ),
+            Text(
+              'Recommended',
+              style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontFamily: 'NerkoOne',
+                  fontSize: 20),
+            )
+          ]),
+          const SizedBox(
+            height: 15,
+          ),
+          SizedBox(
+            width: widget.screenWidth,
+            height: 170,
+            child: AutoSlideshow(
+              children: widget.widgetsList,
+            ),
+          ),
+        ]));
   }
 }
 
@@ -292,7 +311,7 @@ class CategoryView extends StatefulWidget {
   final double screenWidth;
   final int count;
   final Map<String, String> category;
-  final void Function(int)? callback;
+  final void Function(int, String)? callback;
 
   const CategoryView({
     super.key,
@@ -322,8 +341,7 @@ class CategoryViewState extends State<CategoryView> {
             // Detects the tap gesture and triggers the callback if provided
             onTap: () {
               if (widget.callback != null) {
-                widget.callback!(
-                    1); // Pass `count` or any other parameter as needed
+                widget.callback!(1, categoryName);
               }
             },
             child: Stack(
@@ -363,7 +381,6 @@ class CategoryViewState extends State<CategoryView> {
                         height: 100,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
-                          print(error);
                           return const Icon(Icons.error, size: 100);
                         },
                       ),

@@ -109,9 +109,7 @@ class ProductCardN extends ConsumerWidget {
                                 Icons.star,
                                 color: Colors.amber,
                               ),
-                              onRatingUpdate: (rating) {
-                                print(rating);
-                              },
+                              onRatingUpdate: (rating) {},
                               itemSize: 10.0,
                               unratedColor: Colors.grey[300],
                               glow: false,

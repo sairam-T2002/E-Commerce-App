@@ -15,10 +15,12 @@ class AppScreen extends ConsumerStatefulWidget {
 class AppScreenState extends ConsumerState<AppScreen> {
   int _selectedIndex = 0;
   late List<Widget> _widgetOptions;
+  String _category = '';
 
-  void screenNavigationCallback(int index) {
+  void screenNavigationCallback(int index, String category) {
     setState(() {
       _selectedIndex = index;
+      _category = category;
     });
   }
 
@@ -37,7 +39,7 @@ class AppScreenState extends ConsumerState<AppScreen> {
         return GestureDetector(
           onTap: () => Navigator.of(context).pop(),
           child: Container(
-            color: const Color.fromRGBO(0, 0, 0, 0.5),
+            color: const Color(0xff757175).withOpacity(0.3),
             child: GestureDetector(
               onTap: () {},
               child: DraggableScrollableSheet(
@@ -69,7 +71,6 @@ class AppScreenState extends ConsumerState<AppScreen> {
                               ListTile(title: Text('Drawer Item 1')),
                               ListTile(title: Text('Drawer Item 2')),
                               ListTile(title: Text('Drawer Item 3')),
-                              // Add more items as needed
                             ],
                           ),
                         ),
@@ -83,6 +84,11 @@ class AppScreenState extends ConsumerState<AppScreen> {
         );
       },
     );
+  }
+
+  void _handleRightActionButton() {
+    // Add your right action button logic here
+    print('Right action button pressed');
   }
 
   @override
@@ -105,33 +111,58 @@ class AppScreenState extends ConsumerState<AppScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        elevation: 8,
-        backgroundColor: const Color.fromARGB(255, 221, 221, 221),
-        // leading: GestureDetector(
-        //   onTap: _showDrawer,
-        //   child: Container(
-        //     margin: const EdgeInsets.all(8),
-        //     decoration: BoxDecoration(
-        //       color: Colors.white,
-        //       borderRadius: BorderRadius.circular(8),
-        //     ),
-        //     child: const Column(
-        //       mainAxisAlignment: MainAxisAlignment.center,
-        //       children: [
-        //         Icon(Icons.place, color: Color.fromARGB(255, 243, 65, 33)),
-        //         Text('Select',
-        //             style: TextStyle(
-        //                 fontSize: 10, color: Color.fromARGB(255, 243, 65, 33))),
-        //       ],
-        //     ),
-        //   ),
-        // ),
-        title: const Text('Your App Title',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+        leadingWidth:
+            200, // Adjust this value to change the width of the left side
+        leading: InkWell(
+          onTap: _showDrawer,
+          splashColor: const Color(0xffcfcfd1),
+          highlightColor: const Color(0xfff1f0f1),
+          radius: 100,
+          child: const Row(
+            children: [
+              SizedBox(width: 16),
+              Icon(
+                Icons.place,
+                color: Color.fromARGB(255, 87, 87, 87),
+                size: 28,
+              ),
+              SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Current Location',
+                      style: TextStyle(
+                        color: Color.fromARGB(255, 87, 87, 87),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                    Text(
+                      '123 Main St, City',
+                      style: TextStyle(
+                        color: Color.fromARGB(255, 87, 87, 87),
+                        fontSize: 12,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.place, color: Colors.white),
-            onPressed: _showDrawer,
+            icon: const Icon(
+              Icons.person,
+              color: Color.fromARGB(255, 87, 87, 87),
+            ),
+            iconSize: 28,
+            onPressed: _handleRightActionButton,
           ),
         ],
       ),

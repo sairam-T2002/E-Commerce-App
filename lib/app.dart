@@ -1,3 +1,4 @@
+// AppScreen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'Screens/_1home.dart';
@@ -13,22 +14,45 @@ class AppScreen extends ConsumerStatefulWidget {
 }
 
 class AppScreenState extends ConsumerState<AppScreen> {
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   int _selectedIndex = 0;
-  late List<Widget> _widgetOptions;
-  String _category = '';
-
-  void screenNavigationCallback(int index, String category) {
-    setState(() {
-      _selectedIndex = index;
-      _category = category;
-    });
-  }
 
   void _onItemTapped(int index) {
+    if (_selectedIndex != index) {
+      setState(() {
+        _selectedIndex = index;
+      });
+      _navigatorKey.currentState?.pushReplacement(MaterialPageRoute(
+        builder: (context) => _buildScreen(index, '', ''),
+      ));
+    }
+  }
+
+  Widget _buildScreen(int index, String category, String imageUrl) {
+    switch (index) {
+      case 0:
+        return HomeScreen(callback: screenNavigationCallback);
+      case 1:
+        return SearchScreen(
+          categoryName: category,
+          imageUrl: imageUrl,
+        );
+      case 2:
+        return const Center(child: Text('Cart Page'));
+      case 3:
+        return const ProfileScreen();
+      default:
+        return const Center(child: Text('Home'));
+    }
+  }
+
+  void screenNavigationCallback(int index, String category, String imageUrl) {
     setState(() {
       _selectedIndex = index;
-      _category = '';
     });
+    _navigatorKey.currentState?.push(MaterialPageRoute(
+      builder: (context) => _buildScreen(index, category, imageUrl),
+    ));
   }
 
   void _showDrawer() {
@@ -93,86 +117,75 @@ class AppScreenState extends ConsumerState<AppScreen> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    _widgetOptions = <Widget>[
-      HomeScreen(
-        callback: screenNavigationCallback,
-      ),
-      const SearchScreen(
-        categoryName: '',
-        imageUrl: '',
-      ),
-      const Text('Cart Page'),
-      const ProfileScreen(),
-    ];
-  }
-
-  @override
   Widget build(BuildContext context) {
     final cartItems = ref.watch(cartProvider);
     final cartCount = cartItems.length;
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-        leadingWidth:
-            200, // Adjust this value to change the width of the left side
-        leading: InkWell(
-          onTap: _showDrawer,
-          splashColor: const Color(0xffcfcfd1),
-          highlightColor: const Color(0xfff1f0f1),
-          radius: 100,
-          child: const Row(
-            children: [
-              SizedBox(width: 16),
-              Icon(
-                Icons.place,
-                color: Color.fromARGB(255, 87, 87, 87),
-                size: 28,
-              ),
-              SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+      appBar: _selectedIndex == 1
+          ? null // Hide AppBar for SearchScreen
+          : AppBar(
+              backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+              leadingWidth: 200,
+              leading: InkWell(
+                onTap: _showDrawer,
+                splashColor: const Color(0xffcfcfd1),
+                highlightColor: const Color(0xfff1f0f1),
+                radius: 100,
+                child: const Row(
                   children: [
-                    Text(
-                      'Current Location',
-                      style: TextStyle(
-                        color: Color.fromARGB(255, 87, 87, 87),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
+                    SizedBox(width: 16),
+                    Icon(
+                      Icons.place,
+                      color: Color.fromARGB(255, 87, 87, 87),
+                      size: 28,
                     ),
-                    Text(
-                      '123 Main St, City',
-                      style: TextStyle(
-                        color: Color.fromARGB(255, 87, 87, 87),
-                        fontSize: 12,
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Current Location',
+                            style: TextStyle(
+                              color: Color.fromARGB(255, 87, 87, 87),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                          Text(
+                            '123 Main St, City',
+                            style: TextStyle(
+                              color: Color.fromARGB(255, 87, 87, 87),
+                              fontSize: 12,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ),
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.person,
-              color: Color.fromARGB(255, 87, 87, 87),
+              actions: [
+                IconButton(
+                  icon: const Icon(
+                    Icons.person,
+                    color: Color.fromARGB(255, 87, 87, 87),
+                  ),
+                  iconSize: 28,
+                  onPressed: _handleRightActionButton,
+                ),
+              ],
             ),
-            iconSize: 28,
-            onPressed: _handleRightActionButton,
-          ),
-        ],
-      ),
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _widgetOptions,
+      body: Navigator(
+        key: _navigatorKey,
+        onGenerateRoute: (RouteSettings settings) {
+          return MaterialPageRoute(
+            builder: (context) => _buildScreen(_selectedIndex, '', ''),
+          );
+        },
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: <BottomNavigationBarItem>[

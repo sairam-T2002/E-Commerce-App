@@ -6,7 +6,7 @@ import '../Shared/_cardnew.dart';
 import '../Shared/_slideshow.dart';
 
 class HomeScreen extends StatefulWidget {
-  final void Function(int, String)? callback;
+  final void Function(int, String, String)? callback;
   const HomeScreen({super.key, this.callback});
 
   @override
@@ -156,7 +156,7 @@ class FirstSectionState extends State<FirstSection> {
               color: Color.fromARGB(255, 243, 65, 33),
             ),
             SizedBox(
-              width: 2,
+              width: 5,
             ),
             Text(
               'Recommended',
@@ -311,7 +311,7 @@ class CategoryView extends StatefulWidget {
   final double screenWidth;
   final int count;
   final Map<String, String> category;
-  final void Function(int, String)? callback;
+  final void Function(int, String, String)? callback;
 
   const CategoryView({
     super.key,
@@ -341,7 +341,7 @@ class CategoryViewState extends State<CategoryView> {
             // Detects the tap gesture and triggers the callback if provided
             onTap: () {
               if (widget.callback != null) {
-                widget.callback!(1, categoryName);
+                widget.callback!(1, categoryName, imageUrl);
               }
             },
             child: Stack(

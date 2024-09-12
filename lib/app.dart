@@ -27,6 +27,7 @@ class AppScreenState extends ConsumerState<AppScreen> {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+      _category = '';
     });
   }
 
@@ -98,7 +99,10 @@ class AppScreenState extends ConsumerState<AppScreen> {
       HomeScreen(
         callback: screenNavigationCallback,
       ),
-      const SearchScreen(),
+      const SearchScreen(
+        categoryName: '',
+        imageUrl: '',
+      ),
       const Text('Cart Page'),
       const ProfileScreen(),
     ];

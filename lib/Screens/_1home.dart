@@ -156,7 +156,7 @@ class FirstSectionState extends State<FirstSection> {
               color: Color.fromARGB(255, 243, 65, 33),
             ),
             SizedBox(
-              width: 5,
+              width: 2,
             ),
             Text(
               'Recommended',

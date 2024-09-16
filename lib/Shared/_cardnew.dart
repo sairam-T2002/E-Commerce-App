@@ -6,8 +6,13 @@ import '../Shared/_globalstate.dart';
 
 class ProductCardN extends ConsumerWidget {
   final ProductDto product;
+  final Color accent;
 
-  const ProductCardN({super.key, required this.product});
+  const ProductCardN({
+    super.key,
+    required this.product,
+    this.accent = const Color.fromARGB(255, 243, 65, 33),
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -121,8 +126,8 @@ class ProductCardN extends ConsumerWidget {
                         const SizedBox(height: 5),
                         Text(
                           '₹${product.price ?? 0}',
-                          style: const TextStyle(
-                            color: Color.fromARGB(255, 243, 65, 33),
+                          style: TextStyle(
+                            color: accent,
                           ),
                         )
                       ],
@@ -145,7 +150,10 @@ class ProductCardN extends ConsumerWidget {
                         left: 0,
                         right: 0,
                         child: Center(
-                          child: CardActionsN(product: product),
+                          child: CardActionsN(
+                            product: product,
+                            accent: accent,
+                          ),
                         ),
                       ),
                     ],
@@ -162,13 +170,14 @@ class ProductCardN extends ConsumerWidget {
 
 class CardActionsN extends ConsumerWidget {
   final ProductDto product;
-  const CardActionsN({super.key, required this.product});
+  final Color accent;
+  const CardActionsN({super.key, required this.product, required this.accent});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     const double width = 120.0;
     const double height = 40.0;
-    const Color backgroundColor = Color.fromARGB(255, 243, 65, 33);
+    Color backgroundColor = accent;
 
     final cartItems = ref.watch(cartProvider);
     final cartItem = cartItems.firstWhere(
@@ -246,7 +255,7 @@ class CardActionsN extends ConsumerWidget {
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           padding: EdgeInsets.zero,
-          backgroundColor: const Color.fromARGB(255, 243, 65, 33),
+          backgroundColor: accent,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(4),

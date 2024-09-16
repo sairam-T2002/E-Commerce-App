@@ -1,19 +1,23 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '_localstorage.dart';
+import '../config.dart';
 
-const String baseUrl = 'http://10.0.5.38:5085/';
+const String baseUrl = Config.apiUrl;
+const int maxRetries = 2;
 
 Future<Map<String, dynamic>?> getUserCredentials() async {
   return await UserDataHelper.getUserData(LocalStorageKeys.userCred);
 }
 
 Future<Map<String, dynamic>?> fetchApiGET(
-    String endpoint, Map<String, String>? params) async {
+    String endpoint, Map<String, String>? params,
+    {int retryCount = 0}) async {
   Map<String, dynamic>? usr = await getUserCredentials();
   if (usr == null) {
     return null;
   }
+
   Uri url;
   if (params != null) {
     url = Uri.parse(baseUrl + endpoint).replace(queryParameters: params);
@@ -30,9 +34,9 @@ Future<Map<String, dynamic>?> fetchApiGET(
       },
     );
 
-    if (response.statusCode == 401) {
+    if (response.statusCode == 401 && retryCount < maxRetries) {
       return await appRefreshToken(usr['accessToken'], usr['refreshToken'],
-          () => fetchApiGET(endpoint, params));
+          () => fetchApiGET(endpoint, params, retryCount: retryCount + 1));
     }
 
     return response.statusCode == 200 ? jsonDecode(response.body) : null;
@@ -43,7 +47,7 @@ Future<Map<String, dynamic>?> fetchApiGET(
 
 Future<Map<String, dynamic>?> fetchApiPOST(
     String endpoint, Map<String, dynamic> body,
-    {bool isLogin = false}) async {
+    {bool isLogin = false, int retryCount = 0}) async {
   Map<String, dynamic>? usr = await getUserCredentials();
   if (usr == null && !isLogin) {
     return null;
@@ -61,9 +65,12 @@ Future<Map<String, dynamic>?> fetchApiPOST(
       body: jsonEncode(body),
     );
 
-    if (response.statusCode == 401) {
-      return await appRefreshToken(usr!['accessToken'], usr['refreshToken'],
-          () => fetchApiPOST(endpoint, body, isLogin: isLogin));
+    if (response.statusCode == 401 && retryCount < maxRetries) {
+      return await appRefreshToken(
+          usr!['accessToken'],
+          usr['refreshToken'],
+          () => fetchApiPOST(endpoint, body,
+              isLogin: isLogin, retryCount: retryCount + 1));
     }
 
     return response.statusCode == 200 ? jsonDecode(response.body) : null;

@@ -45,5 +45,16 @@ class CartNotifier extends StateNotifier<List<ProductCart>> {
   }
 }
 
+class CategoryNotifier extends StateNotifier<List<String>> {
+  CategoryNotifier() : super([]);
+
+  void addToCategory(String category) {
+    state = [...state, category];
+  }
+}
+
 final cartProvider = StateNotifierProvider<CartNotifier, List<ProductCart>>(
     (ref) => CartNotifier());
+
+final categoryProvider = StateNotifierProvider<CategoryNotifier, List<String>>(
+    (ref) => CategoryNotifier());

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:my_app/Dto/_apiobjects.dart';
 import 'package:my_app/Shared/_apimanager.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../Shared/_globalstate.dart';
 // import '../Shared/_card.dart';
 import '../Shared/_cardnew.dart';
 import '../Shared/_slideshow.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   final void Function(int, String, String)? callback;
   const HomeScreen({super.key, this.callback});
 
@@ -13,7 +15,7 @@ class HomeScreen extends StatefulWidget {
   HomeState createState() => HomeState();
 }
 
-class HomeState extends State<HomeScreen> {
+class HomeState extends ConsumerState<HomeScreen> {
   int i = 0;
   double screenWidth = 0;
   List<Widget> _widgetsListFP = [];
@@ -56,6 +58,9 @@ class HomeState extends State<HomeScreen> {
     }
     if (categories != null) {
       for (var item in categories) {
+        ref
+            .read(categoryProvider.notifier)
+            .addToCategory(item?['category_Name'] ?? '');
         tempCtList.add(CategoryView(
           screenWidth: screenWidth,
           count: categories.length,
@@ -103,7 +108,6 @@ class HomeState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     screenWidth = MediaQuery.of(context).size.width;
-
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -338,7 +342,6 @@ class CategoryViewState extends State<CategoryView> {
           final double containerWidth = constraints.maxWidth;
 
           return GestureDetector(
-            // Detects the tap gesture and triggers the callback if provided
             onTap: () {
               if (widget.callback != null) {
                 widget.callback!(1, categoryName, imageUrl);

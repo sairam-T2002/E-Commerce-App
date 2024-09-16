@@ -5,6 +5,7 @@ import 'Screens/_1home.dart';
 import 'Screens/_4profile.dart';
 import 'Screens/_2search.dart';
 import 'Shared/_globalstate.dart';
+import 'login.dart';
 
 class AppScreen extends ConsumerStatefulWidget {
   const AppScreen({super.key});
@@ -23,7 +24,7 @@ class AppScreenState extends ConsumerState<AppScreen> {
         _selectedIndex = index;
       });
       _navigatorKey.currentState?.pushReplacement(MaterialPageRoute(
-        builder: (context) => _buildScreen(index, '', ''),
+        builder: (context) => _buildScreen(index, 'All', ''),
       ));
     }
   }
@@ -40,10 +41,18 @@ class AppScreenState extends ConsumerState<AppScreen> {
       case 2:
         return const Center(child: Text('Cart Page'));
       case 3:
-        return const ProfileScreen();
+        return ProfileScreen(
+          logoutCallback: _handleLogout,
+        );
       default:
         return const Center(child: Text('Home'));
     }
+  }
+
+  void _handleLogout() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+    );
   }
 
   void screenNavigationCallback(int index, String category, String imageUrl) {
@@ -113,7 +122,6 @@ class AppScreenState extends ConsumerState<AppScreen> {
 
   void _handleRightActionButton() {
     // Add your right action button logic here
-    print('Right action button pressed');
   }
 
   @override
@@ -183,7 +191,7 @@ class AppScreenState extends ConsumerState<AppScreen> {
         key: _navigatorKey,
         onGenerateRoute: (RouteSettings settings) {
           return MaterialPageRoute(
-            builder: (context) => _buildScreen(_selectedIndex, '', ''),
+            builder: (context) => _buildScreen(_selectedIndex, 'All', ''),
           );
         },
       ),

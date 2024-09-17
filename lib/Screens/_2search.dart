@@ -25,6 +25,8 @@ class SearchScreenState extends ConsumerState<SearchScreen> {
   late List<String> categories;
   Map<int, List<ProductDto>> tabContents = {};
   bool isLoading = false;
+  int selectedCategory = 0;
+  String searchQuery = '';
 
   @override
   void initState() {
@@ -78,14 +80,27 @@ class SearchScreenState extends ConsumerState<SearchScreen> {
         .toList();
   }
 
+  List<ProductDto> _getFilteredProducts(int categoryIndex) {
+    List<ProductDto> products = tabContents[categoryIndex] ?? [];
+    if (searchQuery.isEmpty) {
+      return products;
+    }
+    return products
+        .where((product) =>
+            product.name?.toLowerCase().contains(searchQuery.toLowerCase()) ??
+            false)
+        .toList();
+  }
+
   Widget _buildContentWidget(List<ProductDto> products, int categoryIndex) {
-    return products.isEmpty
+    List<ProductDto> filteredProducts = _getFilteredProducts(categoryIndex);
+    return filteredProducts.isEmpty
         ? const Center(child: Text('No products found'))
         : ListView.builder(
-            itemCount: products.length,
+            itemCount: filteredProducts.length,
             itemBuilder: (context, index) {
               return ProductCardN(
-                product: products[index],
+                product: filteredProducts[index],
                 accent:
                     Colors.primaries[categoryIndex % Colors.primaries.length],
               );
@@ -93,9 +108,32 @@ class SearchScreenState extends ConsumerState<SearchScreen> {
           );
   }
 
+  void _handleSearch(String query) {
+    setState(() {
+      searchQuery = query;
+    });
+  }
+
+  void _tabSelected(index) async {
+    setState(() {
+      selectedCategory = index;
+    });
+    if (!tabContents.containsKey(index)) {
+      await _fetchData(index);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
+    List<Widget Function()> products = List.generate(
+      categories.length,
+      (index) => () {
+        return isLoading && !tabContents.containsKey(index)
+            ? const Center(child: CircularProgressIndicator())
+            : _buildContentWidget(tabContents[index] ?? [], index);
+      },
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -123,9 +161,9 @@ class SearchScreenState extends ConsumerState<SearchScreen> {
         Center(
           child: AnimatedSearchBar(
             width: screenWidth - 50,
-            onSearch: (e) {
-              // Implement search functionality
-            },
+            accent:
+                Colors.primaries[selectedCategory % Colors.primaries.length],
+            onSearch: _handleSearch,
           ),
         ),
         const SizedBox(height: 20),
@@ -133,19 +171,8 @@ class SearchScreenState extends ConsumerState<SearchScreen> {
           child: AnimatedTabWidget(
             tabs: categories,
             initialIndex: categories.indexOf(widget.categoryName),
-            tabContentBuilders: List.generate(
-              categories.length,
-              (index) => () {
-                return isLoading && !tabContents.containsKey(index)
-                    ? const Center(child: CircularProgressIndicator())
-                    : _buildContentWidget(tabContents[index] ?? [], index);
-              },
-            ),
-            onTabSelected: (index) async {
-              if (!tabContents.containsKey(index)) {
-                await _fetchData(index);
-              }
-            },
+            tabContentBuilders: products,
+            onTabSelected: _tabSelected,
           ),
         ),
       ],

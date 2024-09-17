@@ -23,6 +23,7 @@ class AnimatedTabWidgetState extends State<AnimatedTabWidget> {
   late PageController _pageController;
   late ScrollController _scrollController;
   bool _isAnimating = false;
+  List<GlobalKey> _tabKeys = [];
 
   @override
   void initState() {
@@ -30,6 +31,7 @@ class AnimatedTabWidgetState extends State<AnimatedTabWidget> {
     _selectedIndex = widget.initialIndex;
     _pageController = PageController(initialPage: _selectedIndex);
     _scrollController = ScrollController();
+    _tabKeys = List.generate(widget.tabs.length, (_) => GlobalKey());
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToSelectedTab(_selectedIndex);
     });
@@ -63,20 +65,30 @@ class AnimatedTabWidgetState extends State<AnimatedTabWidget> {
 
   void _scrollToSelectedTab(int index) {
     if (_scrollController.hasClients) {
-      final RenderBox renderBox = context.findRenderObject() as RenderBox;
-      final double tabWidth = renderBox.size.width / widget.tabs.length;
-      const double tabPadding = 8.0;
-      final double offset = index * (tabWidth + tabPadding);
+      final RenderBox? renderBox =
+          _tabKeys[index].currentContext?.findRenderObject() as RenderBox?;
+      if (renderBox != null) {
+        final position = renderBox.localToGlobal(Offset.zero);
+        final scrollbarStart = _scrollController.position.pixels;
+        final scrollbarWidth = _scrollController.position.viewportDimension;
 
-      // final double screenWidth = renderBox.size.width;
-      final double maxOffset = _scrollController.position.maxScrollExtent;
-      final double adjustedOffset = offset.clamp(0, maxOffset);
+        double targetScroll = scrollbarStart;
 
-      _scrollController.animateTo(
-        adjustedOffset,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
+        if (position.dx < scrollbarStart) {
+          // If the tab is to the left of the viewport
+          targetScroll = position.dx;
+        } else if (position.dx + renderBox.size.width >
+            scrollbarStart + scrollbarWidth) {
+          // If the tab is to the right of the viewport
+          targetScroll = position.dx + renderBox.size.width - scrollbarWidth;
+        }
+
+        _scrollController.animateTo(
+          targetScroll,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
     }
   }
 
@@ -93,6 +105,7 @@ class AnimatedTabWidgetState extends State<AnimatedTabWidget> {
               children: List.generate(widget.tabs.length, (index) {
                 bool isSelected = index == _selectedIndex;
                 return Padding(
+                  key: _tabKeys[index],
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: GestureDetector(
                     onTap: () => onTabPressed(index),

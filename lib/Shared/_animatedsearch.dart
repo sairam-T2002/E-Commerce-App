@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class AnimatedSearchBar extends StatefulWidget {
   final double width;
   final Function(String) onSearch;
   final List<String>? hints;
-  final MaterialAccentColor? accent;
+  final MaterialColor? accent;
 
-  const AnimatedSearchBar(
-      {super.key,
-      required this.width,
-      required this.onSearch,
-      this.hints,
-      this.accent});
+  const AnimatedSearchBar({
+    super.key,
+    required this.width,
+    required this.onSearch,
+    this.hints,
+    this.accent,
+  });
 
   @override
   AnimatedSearchBarState createState() => AnimatedSearchBarState();
@@ -31,6 +33,10 @@ class AnimatedSearchBarState extends State<AnimatedSearchBar>
   late TextEditingController _controller;
   late AnimationController _animationController;
   late Animation<Offset> _offsetAnimation;
+
+  // Speech to text
+  final stt.SpeechToText _speech = stt.SpeechToText();
+  bool _isListening = false;
 
   @override
   void initState() {
@@ -62,6 +68,9 @@ class AnimatedSearchBarState extends State<AnimatedSearchBar>
         });
       }
     });
+
+    // Initialize speech recognition
+    _initSpeech();
   }
 
   @override
@@ -72,9 +81,41 @@ class AnimatedSearchBarState extends State<AnimatedSearchBar>
     super.dispose();
   }
 
+  // Initialize speech recognition
+  void _initSpeech() async {
+    bool available = await _speech.initialize(
+      onStatus: (status) => print('onStatus: $status'),
+      onError: (errorNotification) => print('onError: $errorNotification'),
+    );
+    if (!available) {
+      print("The user has denied the use of speech recognition.");
+    }
+  }
+
+  // Listen for speech input
+  void _listen() async {
+    if (!_isListening) {
+      bool available = await _speech.initialize();
+      if (available) {
+        setState(() => _isListening = true);
+        _speech.listen(
+          onResult: (result) {
+            setState(() {
+              _controller.text = result.recognizedWords;
+              widget.onSearch(_controller.text);
+            });
+          },
+        );
+      }
+    } else {
+      setState(() => _isListening = false);
+      _speech.stop();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    MaterialAccentColor accent = widget.accent ?? Colors.redAccent;
+    Color accent = widget.accent ?? const Color.fromARGB(255, 243, 65, 33);
     return Container(
       width: widget.width,
       height: 50,
@@ -141,12 +182,10 @@ class AnimatedSearchBarState extends State<AnimatedSearchBar>
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: GestureDetector(
-              onTap: () {
-                // function for mic tap implementation
-              },
+              onTap: _listen,
               child: Icon(
-                Icons.mic_none_outlined,
-                color: accent,
+                _isListening ? Icons.mic : Icons.mic_none_outlined,
+                color: _isListening ? Colors.red : accent,
               ),
             ),
           )

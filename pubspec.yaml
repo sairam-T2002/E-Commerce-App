@@ -43,6 +43,7 @@ dependencies:
   flutter_riverpod: ^2.5.1
   connectivity_plus: ^6.0.5
   speech_to_text: ^7.0.0
+  window_manager: ^0.4.2
 
 dev_dependencies:
   flutter_test:

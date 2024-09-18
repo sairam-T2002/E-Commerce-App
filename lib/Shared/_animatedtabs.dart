@@ -5,12 +5,14 @@ class AnimatedTabWidget extends StatefulWidget {
   final List<Widget Function()> tabContentBuilders;
   final Function(int) onTabSelected;
   final int initialIndex;
+  final bool hideTabs;
 
   const AnimatedTabWidget({
     super.key,
     required this.tabs,
     required this.tabContentBuilders,
     required this.onTabSelected,
+    this.hideTabs = false,
     this.initialIndex = 0,
   });
 
@@ -96,59 +98,65 @@ class AnimatedTabWidgetState extends State<AnimatedTabWidget> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        SizedBox(
-          height: 50,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            controller: _scrollController,
-            child: Row(
-              children: List.generate(widget.tabs.length, (index) {
-                bool isSelected = index == _selectedIndex;
-                return Padding(
-                  key: _tabKeys[index],
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: GestureDetector(
-                    onTap: () => onTabPressed(index),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 10, horizontal: 20),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? Colors.primaries[index % Colors.primaries.length]
-                            : Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: isSelected
-                            ? [
-                                BoxShadow(
-                                  color: Colors.primaries[
-                                          index % Colors.primaries.length]
-                                      .withOpacity(0.5),
-                                  spreadRadius: 2,
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ]
-                            : [],
-                      ),
-                      child: Text(
-                        widget.tabs[index],
-                        style: TextStyle(
-                          color: isSelected ? Colors.white : Colors.black,
-                          fontWeight: FontWeight.bold,
+        !widget.hideTabs
+            ? SizedBox(
+                height: 50,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  controller: _scrollController,
+                  child: Row(
+                    children: List.generate(widget.tabs.length, (index) {
+                      bool isSelected = index == _selectedIndex;
+                      return Padding(
+                        key: _tabKeys[index],
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: GestureDetector(
+                          onTap: () => onTabPressed(index),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 20),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? Colors.primaries[
+                                      index % Colors.primaries.length]
+                                  : Colors.grey.shade200,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: isSelected
+                                  ? [
+                                      BoxShadow(
+                                        color: Colors.primaries[
+                                                index % Colors.primaries.length]
+                                            .withOpacity(0.5),
+                                        spreadRadius: 2,
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ]
+                                  : [],
+                            ),
+                            child: Text(
+                              widget.tabs[index],
+                              style: TextStyle(
+                                color: isSelected ? Colors.white : Colors.black,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
+                      );
+                    }),
                   ),
-                );
-              }),
-            ),
-          ),
-        ),
+                ),
+              )
+            : const SizedBox(
+                height: 0,
+              ),
         const SizedBox(height: 10),
         Expanded(
           child: PageView(
+            physics: const NeverScrollableScrollPhysics(),
             controller: _pageController,
             onPageChanged: (index) {
               if (!_isAnimating) {

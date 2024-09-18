@@ -20,8 +20,15 @@ class SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _checkConnectivity() async {
-    var connectivityResult = await (Connectivity().checkConnectivity());
-    if (connectivityResult == ConnectivityResult.none) {
+    var connectivityResults = await (Connectivity().checkConnectivity());
+
+    // Assuming connectivityResults is a List<ConnectivityResult>
+    bool isConnected = connectivityResults.any((result) =>
+        result == ConnectivityResult.mobile ||
+        result == ConnectivityResult.wifi ||
+        result == ConnectivityResult.ethernet);
+
+    if (!isConnected) {
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const NoInternetScreen()),

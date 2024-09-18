@@ -31,6 +31,8 @@ class SearchScreenState extends ConsumerState<SearchScreen> {
   String searchQuery = '';
   Map<String, String> bannerImgs = {};
   late String categoryName;
+  final ScrollController _scrollController = ScrollController();
+  double scrollProgession = 0;
 
   @override
   void initState() {
@@ -38,6 +40,14 @@ class SearchScreenState extends ConsumerState<SearchScreen> {
     super.initState();
     categories = ['All', ...ref.read(categoryProvider)];
     _fetchData(categories.indexOf(widget.categoryName));
+    _scrollController.addListener(() {
+      setState(() {
+        scrollProgession = _scrollController.offset / 200;
+      });
+      if (_scrollController.offset > 200) {
+        _scrollController.jumpTo(200);
+      }
+    });
   }
 
   Future<void> _fetchData(int index) async {
@@ -145,50 +155,61 @@ class SearchScreenState extends ConsumerState<SearchScreen> {
             : _buildContentWidget(tabContents[index] ?? [], index);
       },
     );
-    // String imageUrl = widget.imageUrl.isEmpty
-    //     ? ref.read(defaultImgProvider)
-    //     : widget.imageUrl;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Hero(
-          tag: widget.categoryName,
-          child: Center(
-            child: ClipRRect(
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(20),
-                bottomRight: Radius.circular(20),
-              ),
-              child: (bannerImgs[categoryName] ?? '') != ''
-                  ? Image.network(
-                      bannerImgs[categoryName] ?? '',
-                      width: screenWidth,
-                      height: 200,
-                      fit: BoxFit.cover,
-                    )
-                  : const Center(
-                      heightFactor: 5.55,
-                      child: CircularProgressIndicator(),
+
+    return CustomScrollView(
+      controller: _scrollController,
+      slivers: [
+        SliverToBoxAdapter(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Hero(
+                tag: widget.categoryName,
+                child: Center(
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(20),
+                      bottomRight: Radius.circular(20),
                     ),
-            ),
+                    child: (bannerImgs[categoryName] ?? '') != ''
+                        ? Opacity(
+                            opacity: scrollProgession < 200
+                                ? 1 - scrollProgession
+                                : 0,
+                            child: Image.network(
+                              bannerImgs[categoryName] ?? '',
+                              width: screenWidth,
+                              height: 200,
+                              fit: BoxFit.cover,
+                            ),
+                          )
+                        : const Center(
+                            heightFactor: 5.55,
+                            child: CircularProgressIndicator(),
+                          ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Center(
+                child: AnimatedSearchBar(
+                  width: screenWidth - 50,
+                  accent: Colors
+                      .primaries[selectedCategory % Colors.primaries.length],
+                  onSearch: _handleSearch,
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
           ),
         ),
-        const SizedBox(height: 10),
-        Center(
-          child: AnimatedSearchBar(
-            width: screenWidth - 50,
-            accent:
-                Colors.primaries[selectedCategory % Colors.primaries.length],
-            onSearch: _handleSearch,
-          ),
-        ),
-        const SizedBox(height: 20),
-        Expanded(
+        SliverFillRemaining(
           child: AnimatedTabWidget(
             tabs: categories,
             initialIndex: categories.indexOf(widget.categoryName),
             tabContentBuilders: products,
             onTabSelected: _tabSelected,
+            hideTabs: scrollProgession == 1,
           ),
         ),
       ],

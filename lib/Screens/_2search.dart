@@ -109,6 +109,9 @@ class SearchScreenState extends ConsumerState<SearchScreen> {
     return filteredProducts.isEmpty
         ? const Center(child: Text('No products found'))
         : ListView.builder(
+            physics: scrollProgession == 1
+                ? const ScrollPhysics()
+                : const NeverScrollableScrollPhysics(),
             itemCount: filteredProducts.length,
             itemBuilder: (context, index) {
               return ProductCardN(
@@ -190,10 +193,12 @@ class SearchScreenState extends ConsumerState<SearchScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
+              scrollProgession == 1
+                  ? const SizedBox(height: 20)
+                  : const SizedBox(height: 10),
               Center(
                 child: AnimatedSearchBar(
-                  width: screenWidth - 50,
+                  width: screenWidth - ((1 - scrollProgession) * 50),
                   accent: Colors
                       .primaries[selectedCategory % Colors.primaries.length],
                   onSearch: _handleSearch,

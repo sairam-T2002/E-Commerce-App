@@ -68,20 +68,20 @@ class AnimatedTabWidgetState extends State<AnimatedTabWidget> {
       final RenderBox? renderBox =
           _tabKeys[index].currentContext?.findRenderObject() as RenderBox?;
       if (renderBox != null) {
-        final position = renderBox.localToGlobal(Offset.zero);
-        final scrollbarStart = _scrollController.position.pixels;
         final scrollbarWidth = _scrollController.position.viewportDimension;
+        final tabWidth = renderBox.size.width;
 
-        double targetScroll = scrollbarStart;
+        // Calculate the target scroll position to center the tab
+        double targetScroll = _scrollController.position.pixels +
+            renderBox.localToGlobal(Offset.zero).dx +
+            (tabWidth / 2) -
+            (scrollbarWidth / 2);
 
-        if (position.dx < scrollbarStart) {
-          // If the tab is to the left of the viewport
-          targetScroll = position.dx;
-        } else if (position.dx + renderBox.size.width >
-            scrollbarStart + scrollbarWidth) {
-          // If the tab is to the right of the viewport
-          targetScroll = position.dx + renderBox.size.width - scrollbarWidth;
-        }
+        // Ensure the target scroll position is within bounds
+        targetScroll = targetScroll.clamp(
+          0.0,
+          _scrollController.position.maxScrollExtent,
+        );
 
         _scrollController.animateTo(
           targetScroll,

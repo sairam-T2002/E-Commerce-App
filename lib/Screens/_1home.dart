@@ -9,7 +9,8 @@ import '../Shared/_slideshow.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   final void Function(int, String, String)? callback;
-  const HomeScreen({super.key, this.callback});
+  final Function logoutCallback;
+  const HomeScreen({super.key, this.callback, required this.logoutCallback});
 
   @override
   HomeState createState() => HomeState();
@@ -18,6 +19,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 class HomeState extends ConsumerState<HomeScreen> {
   int i = 0;
   double screenWidth = 0;
+  List<String> _labels = [];
   List<Widget> _widgetsListFP = [];
   List<Widget> _widgetsListCT = [];
   List<Widget> _widgetsListCA = [];
@@ -29,12 +31,23 @@ class HomeState extends ConsumerState<HomeScreen> {
     });
     Map<String, dynamic>? response =
         await fetchApiGET('api/AppData/GetHomePageData', null);
+    if (response == null) {
+      widget.logoutCallback();
+      return;
+    }
+    List<String> tempLbList = [];
     List<Widget> tempFpList = [];
     List<Widget> tempCtList = [];
     List<Widget> tempCaList = [];
-    List<dynamic>? featuredPd = response?['featuredProducts'];
-    List<dynamic>? categories = response?['categories'];
-    List<dynamic>? carosel = response?['carouselUrls'];
+    List<dynamic>? labels = response['label'];
+    List<dynamic>? featuredPd = response['featuredProducts'];
+    List<dynamic>? categories = response['categories'];
+    List<dynamic>? carosel = response['carouselUrls'];
+    String defaultImg = response['defaultSearchBanner'].toString();
+    if (labels != null && labels.length == 3) {
+      tempLbList = labels.cast<String>();
+      // tempLbList = labels.map((item) => item.toString()).toList();
+    }
     if (featuredPd != null) {
       for (var item in featuredPd) {
         tempFpList.add(
@@ -56,11 +69,19 @@ class HomeState extends ConsumerState<HomeScreen> {
         );
       }
     }
+    List<String> globCat = ref.read(categoryProvider);
+    String globImg = ref.read(defaultImgProvider);
+    if (globImg.isEmpty) {
+      ref.read(defaultImgProvider.notifier).setDefaultImg(defaultImg);
+    }
     if (categories != null) {
       for (var item in categories) {
-        ref
-            .read(categoryProvider.notifier)
-            .addToCategory(item?['category_Name'] ?? '');
+        if (globCat.isEmpty) {
+          ref
+              .read(categoryProvider.notifier)
+              .addToCategory(item?['category_Name'] ?? '');
+        }
+
         tempCtList.add(CategoryView(
           screenWidth: screenWidth,
           count: categories.length,
@@ -92,6 +113,7 @@ class HomeState extends ConsumerState<HomeScreen> {
       }
     }
     setState(() {
+      _labels = tempLbList;
       _widgetsListFP = tempFpList;
       _widgetsListCT = tempCtList;
       _widgetsListCA = tempCaList;
@@ -119,10 +141,12 @@ class HomeState extends ConsumerState<HomeScreen> {
             FirstSection(
               screenWidth: screenWidth,
               widgetsList: _widgetsListCA,
+              label: _labels[0],
             ),
             SecondSection(
               screenWidth: screenWidth,
               widgetList: _widgetsListCT,
+              label: _labels[1],
             ),
             const SizedBox(
               height: 10,
@@ -130,6 +154,7 @@ class HomeState extends ConsumerState<HomeScreen> {
             ThirdSection(
               screenWidth: screenWidth,
               widgetList: _widgetsListFP,
+              label: _labels[2],
             ),
           ],
         ),
@@ -141,8 +166,12 @@ class HomeState extends ConsumerState<HomeScreen> {
 class FirstSection extends StatefulWidget {
   final double screenWidth;
   final List<Widget> widgetsList;
+  final String label;
   const FirstSection(
-      {super.key, required this.screenWidth, required this.widgetsList});
+      {super.key,
+      required this.screenWidth,
+      required this.widgetsList,
+      required this.label});
 
   @override
   FirstSectionState createState() => FirstSectionState();
@@ -154,17 +183,17 @@ class FirstSectionState extends State<FirstSection> {
     return Padding(
         padding: const EdgeInsets.all(10),
         child: Column(children: [
-          const Row(children: [
-            Icon(
+          Row(children: [
+            const Icon(
               Icons.recommend,
               color: Color.fromARGB(255, 243, 65, 33),
             ),
-            SizedBox(
+            const SizedBox(
               width: 5,
             ),
             Text(
-              'Recommended',
-              style: TextStyle(
+              widget.label,
+              style: const TextStyle(
                   fontWeight: FontWeight.w700,
                   fontFamily: 'NerkoOne',
                   fontSize: 20),
@@ -187,11 +216,12 @@ class FirstSectionState extends State<FirstSection> {
 class SecondSection extends StatefulWidget {
   final double screenWidth;
   final List<Widget> widgetList;
-  const SecondSection({
-    super.key,
-    required this.screenWidth,
-    required this.widgetList,
-  });
+  final String label;
+  const SecondSection(
+      {super.key,
+      required this.screenWidth,
+      required this.widgetList,
+      required this.label});
 
   @override
   SecondSectionState createState() => SecondSectionState();
@@ -208,17 +238,17 @@ class SecondSectionState extends State<SecondSection> {
           child: SizedBox(
             width: widget.screenWidth,
             height: 25,
-            child: const Row(children: [
-              Icon(
+            child: Row(children: [
+              const Icon(
                 Icons.menu_book,
                 color: Color.fromARGB(255, 243, 65, 33),
               ),
-              SizedBox(
+              const SizedBox(
                 width: 5,
               ),
               Text(
-                'Categories',
-                style: TextStyle(
+                widget.label,
+                style: const TextStyle(
                     fontWeight: FontWeight.w700,
                     fontFamily: 'NerkoOne',
                     fontSize: 20),
@@ -232,20 +262,18 @@ class SecondSectionState extends State<SecondSection> {
         Padding(
           padding: const EdgeInsets.all(3),
           child: GridView.builder(
-            physics:
-                const NeverScrollableScrollPhysics(), // Disable GridView's own scrolling
-            shrinkWrap:
-                true, // Allow GridView to adjust its height based on content
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount:
                   widget.widgetList.length >= (widget.screenWidth / 140).toInt()
                       ? (widget.screenWidth / 140).toInt()
                       : widget.widgetList.isNotEmpty
                           ? widget.widgetList.length
-                          : 1, // Fixed number of columns
-              crossAxisSpacing: 0, // Space between columns
-              mainAxisSpacing: 60, // Space between rows
-              mainAxisExtent: 100, // Fixed height of each item
+                          : 1,
+              crossAxisSpacing: 0,
+              mainAxisSpacing: 60,
+              mainAxisExtent: 100,
             ),
             itemCount: widget.widgetList.length,
             itemBuilder: (context, index) {
@@ -261,9 +289,13 @@ class SecondSectionState extends State<SecondSection> {
 class ThirdSection extends StatefulWidget {
   final double screenWidth;
   final List<Widget> widgetList;
+  final String label;
 
   const ThirdSection(
-      {super.key, required this.screenWidth, required this.widgetList});
+      {super.key,
+      required this.screenWidth,
+      required this.widgetList,
+      required this.label});
 
   @override
   ThirdSectionState createState() => ThirdSectionState();
@@ -279,17 +311,17 @@ class ThirdSectionState extends State<ThirdSection> {
           child: SizedBox(
             width: widget.screenWidth,
             height: 25,
-            child: const Row(children: [
-              Icon(
+            child: Row(children: [
+              const Icon(
                 Icons.star,
                 color: Color.fromARGB(255, 243, 65, 33),
               ),
-              SizedBox(
+              const SizedBox(
                 width: 5,
               ),
               Text(
-                'Featured Products',
-                style: TextStyle(
+                widget.label,
+                style: const TextStyle(
                     fontWeight: FontWeight.w700,
                     fontFamily: 'NerkoOne',
                     fontSize: 20),

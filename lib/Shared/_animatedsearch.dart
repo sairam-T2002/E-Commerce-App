@@ -70,7 +70,7 @@ class AnimatedSearchBarState extends State<AnimatedSearchBar>
     });
 
     // Initialize speech recognition
-    _initSpeech();
+    // _initSpeech();
   }
 
   @override

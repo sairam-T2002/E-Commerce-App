@@ -10,10 +10,12 @@ import 'package:my_app/Dto/_apiobjects.dart';
 class SearchScreen extends ConsumerStatefulWidget {
   final String categoryName;
   final String imageUrl;
+  final Function logoutCallback;
 
   const SearchScreen({
     required this.categoryName,
     required this.imageUrl,
+    required this.logoutCallback,
     super.key,
   });
 
@@ -27,9 +29,12 @@ class SearchScreenState extends ConsumerState<SearchScreen> {
   bool isLoading = false;
   int selectedCategory = 0;
   String searchQuery = '';
+  Map<String, String> bannerImgs = {};
+  late String categoryName;
 
   @override
   void initState() {
+    categoryName = widget.categoryName;
     super.initState();
     categories = ['All', ...ref.read(categoryProvider)];
     _fetchData(categories.indexOf(widget.categoryName));
@@ -38,25 +43,22 @@ class SearchScreenState extends ConsumerState<SearchScreen> {
   Future<void> _fetchData(int index) async {
     if (!mounted) return;
 
-    setState(() {
-      isLoading = true;
-    });
-
     try {
       var result = await fetchApiGET(
           'api/AppData/GetSearchResults/${categories[index]}', null);
 
       if (mounted) {
         setState(() {
+          String resBanner = result?['categoryImageUrl'].toString() ?? '';
+          bannerImgs[result?['categoryName'] ?? ''] =
+              resBanner.isNotEmpty ? resBanner : ref.read(defaultImgProvider);
           tabContents[index] = _parseProducts(result?['result'] ?? []);
-          isLoading = false;
         });
       }
     } catch (error) {
       if (mounted) {
         setState(() {
           tabContents[index] = [];
-          isLoading = false;
         });
       }
     }
@@ -117,9 +119,18 @@ class SearchScreenState extends ConsumerState<SearchScreen> {
   void _tabSelected(index) async {
     setState(() {
       selectedCategory = index;
+      categoryName = categories[index];
+      isLoading = true;
     });
     if (!tabContents.containsKey(index)) {
       await _fetchData(index);
+      setState(() {
+        isLoading = false;
+      });
+    } else {
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
@@ -134,6 +145,9 @@ class SearchScreenState extends ConsumerState<SearchScreen> {
             : _buildContentWidget(tabContents[index] ?? [], index);
       },
     );
+    // String imageUrl = widget.imageUrl.isEmpty
+    //     ? ref.read(defaultImgProvider)
+    //     : widget.imageUrl;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -145,15 +159,17 @@ class SearchScreenState extends ConsumerState<SearchScreen> {
                 bottomLeft: Radius.circular(20),
                 bottomRight: Radius.circular(20),
               ),
-              child: Image.network(
-                widget.imageUrl,
-                width: screenWidth,
-                height: 200,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return const Icon(Icons.error, size: 100);
-                },
-              ),
+              child: (bannerImgs[categoryName] ?? '') != ''
+                  ? Image.network(
+                      bannerImgs[categoryName] ?? '',
+                      width: screenWidth,
+                      height: 200,
+                      fit: BoxFit.cover,
+                    )
+                  : const Center(
+                      heightFactor: 5.55,
+                      child: CircularProgressIndicator(),
+                    ),
             ),
           ),
         ),

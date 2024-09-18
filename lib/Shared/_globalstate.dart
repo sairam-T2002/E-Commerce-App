@@ -53,8 +53,19 @@ class CategoryNotifier extends StateNotifier<List<String>> {
   }
 }
 
+class DefaultSearchImage extends StateNotifier<String> {
+  DefaultSearchImage() : super('');
+
+  void setDefaultImg(String imageUrl) {
+    state = imageUrl;
+  }
+}
+
 final cartProvider = StateNotifierProvider<CartNotifier, List<ProductCart>>(
     (ref) => CartNotifier());
 
 final categoryProvider = StateNotifierProvider<CategoryNotifier, List<String>>(
     (ref) => CategoryNotifier());
+
+final defaultImgProvider = StateNotifierProvider<DefaultSearchImage, String>(
+    (ref) => DefaultSearchImage());

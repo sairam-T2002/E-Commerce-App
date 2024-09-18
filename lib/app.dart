@@ -32,11 +32,15 @@ class AppScreenState extends ConsumerState<AppScreen> {
   Widget _buildScreen(int index, String category, String imageUrl) {
     switch (index) {
       case 0:
-        return HomeScreen(callback: screenNavigationCallback);
+        return HomeScreen(
+          callback: screenNavigationCallback,
+          logoutCallback: _handleLogout,
+        );
       case 1:
         return SearchScreen(
           categoryName: category,
           imageUrl: imageUrl,
+          logoutCallback: _handleLogout,
         );
       case 2:
         return const Center(child: Text('Cart Page'));

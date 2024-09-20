@@ -82,15 +82,15 @@ class AnimatedSearchBarState extends State<AnimatedSearchBar>
   }
 
   // Initialize speech recognition
-  void _initSpeech() async {
-    bool available = await _speech.initialize(
-      onStatus: (status) => print('onStatus: $status'),
-      onError: (errorNotification) => print('onError: $errorNotification'),
-    );
-    if (!available) {
-      print("The user has denied the use of speech recognition.");
-    }
-  }
+  // void _initSpeech() async {
+  //   bool available = await _speech.initialize(
+  //     onStatus: (status) => print('onStatus: $status'),
+  //     onError: (errorNotification) => print('onError: $errorNotification'),
+  //   );
+  //   if (!available) {
+  //     print("The user has denied the use of speech recognition.");
+  //   }
+  // }
 
   // Listen for speech input
   void _listen() async {

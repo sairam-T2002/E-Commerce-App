@@ -153,7 +153,7 @@ class AnimatedTabWidgetState extends State<AnimatedTabWidget> {
             : const SizedBox(
                 height: 0,
               ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 5),
         Expanded(
           child: PageView(
             physics: const NeverScrollableScrollPhysics(),

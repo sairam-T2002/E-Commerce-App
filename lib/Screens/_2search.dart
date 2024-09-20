@@ -32,7 +32,30 @@ class SearchScreenState extends ConsumerState<SearchScreen> {
   Map<String, String> bannerImgs = {};
   late String categoryName;
   final ScrollController _scrollController = ScrollController();
+  final ScrollController _listController = ScrollController();
   double scrollProgession = 0;
+  double listProgession = 0;
+  bool userInteracted = false;
+
+  void mainScrollCallback() {
+    setState(() {
+      scrollProgession = _scrollController.offset / 200;
+      if (_scrollController.offset > 200) {
+        _scrollController.jumpTo(200);
+        userInteracted = true;
+      }
+    });
+  }
+
+  void listScrollCallback() {
+    setState(() {
+      if (_listController.offset == 0) {
+        userInteracted = false;
+      } else {
+        userInteracted = true;
+      }
+    });
+  }
 
   @override
   void initState() {
@@ -40,14 +63,17 @@ class SearchScreenState extends ConsumerState<SearchScreen> {
     super.initState();
     categories = ['All', ...ref.read(categoryProvider)];
     _fetchData(categories.indexOf(widget.categoryName));
-    _scrollController.addListener(() {
-      setState(() {
-        scrollProgession = _scrollController.offset / 200;
-      });
-      if (_scrollController.offset > 200) {
-        _scrollController.jumpTo(200);
-      }
-    });
+    _scrollController.addListener(mainScrollCallback);
+    _listController.addListener(listScrollCallback);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(mainScrollCallback);
+    _listController.removeListener(listScrollCallback);
+    _scrollController.dispose();
+    _listController.dispose();
+    super.dispose();
   }
 
   Future<void> _fetchData(int index) async {
@@ -63,6 +89,7 @@ class SearchScreenState extends ConsumerState<SearchScreen> {
           bannerImgs[result?['categoryName'] ?? ''] =
               resBanner.isNotEmpty ? resBanner : ref.read(defaultImgProvider);
           tabContents[index] = _parseProducts(result?['result'] ?? []);
+          selectedCategory = index;
         });
       }
     } catch (error) {
@@ -87,7 +114,7 @@ class SearchScreenState extends ConsumerState<SearchScreen> {
               imgUrl: item['image_Url'] ?? '',
               stockCount: item['stockCount'],
               rating: double.parse(item['rating'].toString()),
-              description: '',
+              ratingCount: int.parse(item['ratingCount'].toString()),
             ))
         .toList();
   }
@@ -109,9 +136,10 @@ class SearchScreenState extends ConsumerState<SearchScreen> {
     return filteredProducts.isEmpty
         ? const Center(child: Text('No products found'))
         : ListView.builder(
-            physics: scrollProgession == 1
+            physics: (scrollProgession == 1 && userInteracted)
                 ? const ScrollPhysics()
                 : const NeverScrollableScrollPhysics(),
+            controller: _listController,
             itemCount: filteredProducts.length,
             itemBuilder: (context, index) {
               return ProductCardN(
@@ -193,9 +221,7 @@ class SearchScreenState extends ConsumerState<SearchScreen> {
                   ),
                 ),
               ),
-              scrollProgession == 1
-                  ? const SizedBox(height: 20)
-                  : const SizedBox(height: 10),
+              SizedBox(height: scrollProgession == 1 ? 25 : 10),
               Center(
                 child: AnimatedSearchBar(
                   width: screenWidth - ((1 - scrollProgession) * 50),
@@ -204,7 +230,7 @@ class SearchScreenState extends ConsumerState<SearchScreen> {
                   onSearch: _handleSearch,
                 ),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: scrollProgession == 1 ? 5 : 10),
             ],
           ),
         ),

@@ -16,7 +16,6 @@ class CardState extends State<ProductCard> {
   late bool _isBestSeller;
   // late int? _productId;
   late String _productName;
-  late String _productDescription;
   late double _review;
   late int _price;
   late String _imgUrl;
@@ -33,7 +32,6 @@ class CardState extends State<ProductCard> {
       _isBestSeller = widget.product.isBestSeller ?? false;
       _productName = widget.product.name ?? '';
       // _productId = widget.product.prdId;
-      _productDescription = widget.product.description ?? '';
       _review = widget.product.rating ?? 0.0;
       _price = widget.product.price ?? 0;
       _imgUrl = widget.product.imgUrl ?? '';
@@ -122,13 +120,6 @@ class CardState extends State<ProductCard> {
                               fontWeight: FontWeight.w400,
                               fontSize: 20,
                               fontFamily: 'NerkoOne'),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          _productDescription,
-                          style: const TextStyle(fontSize: 8),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 8),
                         Row(

@@ -53,18 +53,17 @@ class HomeState extends ConsumerState<HomeScreen> {
         tempFpList.add(
           ProductCardN(
             product: ProductDto(
-              prdId: item['product_Id'] ?? '',
-              name: item['product_Name'] ?? '',
-              isVeg: item['isVeg'] ?? true,
-              isBestSeller: item['isBestSeller'] ?? false,
-              price: item['price'] ?? 0,
-              imageSrl: 1,
-              categoryId: item['category_Id'] ?? 0,
-              imgUrl: item['image_Url'] ?? '',
-              stockCount: item['stockCount'],
-              rating: double.parse(item['rating'].toString()),
-              description: '',
-            ),
+                prdId: item['product_Id'] ?? '',
+                name: item['product_Name'] ?? '',
+                isVeg: item['isVeg'] ?? true,
+                isBestSeller: item['isBestSeller'] ?? false,
+                price: item['price'] ?? 0,
+                imageSrl: 1,
+                categoryId: item['category_Id'] ?? 0,
+                imgUrl: item['image_Url'] ?? '',
+                stockCount: item['stockCount'],
+                rating: double.parse(item['rating'].toString()),
+                ratingCount: int.parse(item['ratingCount'].toString())),
           ),
         );
       }

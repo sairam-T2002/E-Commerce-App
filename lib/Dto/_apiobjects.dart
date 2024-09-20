@@ -9,19 +9,20 @@ class ProductDto {
   String? imgUrl;
   int? stockCount;
   double? rating;
-  String? description;
-  ProductDto(
-      {this.prdId,
-      this.name,
-      this.isVeg,
-      this.isBestSeller,
-      this.price,
-      this.imageSrl,
-      this.categoryId,
-      this.imgUrl,
-      this.stockCount,
-      this.rating,
-      this.description});
+  int? ratingCount;
+  ProductDto({
+    this.prdId,
+    this.name,
+    this.isVeg,
+    this.isBestSeller,
+    this.price,
+    this.imageSrl,
+    this.categoryId,
+    this.imgUrl,
+    this.stockCount,
+    this.rating,
+    this.ratingCount,
+  });
 }
 
 class CategoryDto {

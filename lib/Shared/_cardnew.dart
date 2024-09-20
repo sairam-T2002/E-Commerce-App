@@ -66,8 +66,7 @@ class ProductCardN extends ConsumerWidget {
                               Container(
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(10),
-                                  color:
-                                      const Color.fromARGB(255, 243, 226, 175),
+                                  color: const Color(0xffd0dcaa),
                                 ),
                                 padding: const EdgeInsets.fromLTRB(8, 2, 8, 2),
                                 child: const Row(children: [
@@ -93,13 +92,6 @@ class ProductCardN extends ConsumerWidget {
                               fontFamily: 'NerkoOne'),
                         ),
                         const SizedBox(height: 5),
-                        Text(
-                          product.description ?? '',
-                          style: const TextStyle(fontSize: 8),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 5),
                         Row(
                           children: [
                             RatingBar.builder(
@@ -120,16 +112,22 @@ class ProductCardN extends ConsumerWidget {
                               glow: false,
                               glowColor: Colors.amber.withOpacity(0.5),
                               ignoreGestures: true,
-                            )
+                            ),
+                            Text(
+                              '(${product.ratingCount ?? ''})',
+                              style: TextStyle(
+                                color: accent,
+                              ),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 5),
                         Text(
                           '₹${product.price ?? 0}',
-                          style: TextStyle(
-                            color: accent,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
                           ),
-                        )
+                        ),
                       ],
                     ),
                   ),

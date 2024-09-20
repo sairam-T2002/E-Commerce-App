@@ -3,7 +3,6 @@ import 'package:my_app/Dto/_apiobjects.dart';
 import 'package:my_app/Shared/_apimanager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../Shared/_globalstate.dart';
-// import '../Shared/_card.dart';
 import '../Shared/_cardnew.dart';
 import '../Shared/_slideshow.dart';
 
@@ -26,6 +25,7 @@ class HomeState extends ConsumerState<HomeScreen> {
   bool _isLoading = true;
 
   Future<void> updateStateFromApi() async {
+    print('update from api');
     setState(() {
       _isLoading = true;
     });
@@ -46,7 +46,6 @@ class HomeState extends ConsumerState<HomeScreen> {
     String defaultImg = response['defaultSearchBanner'].toString();
     if (labels != null && labels.length == 3) {
       tempLbList = labels.cast<String>();
-      // tempLbList = labels.map((item) => item.toString()).toList();
     }
     if (featuredPd != null) {
       for (var item in featuredPd) {
@@ -120,6 +119,11 @@ class HomeState extends ConsumerState<HomeScreen> {
     });
   }
 
+  Future<void> _handleRefresh() async {
+    // This method will be called when the user performs a pull-to-refresh action
+    await updateStateFromApi();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -134,28 +138,32 @@ class HomeState extends ConsumerState<HomeScreen> {
         child: CircularProgressIndicator(),
       );
     } else {
-      return SingleChildScrollView(
-        child: Column(
-          children: [
-            FirstSection(
-              screenWidth: screenWidth,
-              widgetsList: _widgetsListCA,
-              label: _labels[0],
-            ),
-            SecondSection(
-              screenWidth: screenWidth,
-              widgetList: _widgetsListCT,
-              label: _labels[1],
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            ThirdSection(
-              screenWidth: screenWidth,
-              widgetList: _widgetsListFP,
-              label: _labels[2],
-            ),
-          ],
+      return RefreshIndicator(
+        onRefresh: _handleRefresh,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            children: [
+              FirstSection(
+                screenWidth: screenWidth,
+                widgetsList: _widgetsListCA,
+                label: _labels[0],
+              ),
+              SecondSection(
+                screenWidth: screenWidth,
+                widgetList: _widgetsListCT,
+                label: _labels[1],
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              ThirdSection(
+                screenWidth: screenWidth,
+                widgetList: _widgetsListFP,
+                label: _labels[2],
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -328,8 +336,6 @@ class ThirdSectionState extends State<ThirdSection> {
             ]),
           ),
         ),
-
-        // const SizedBox(height: 50),
         SizedBox(
           width: widget.screenWidth,
           height: 170,

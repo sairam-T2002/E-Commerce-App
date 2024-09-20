@@ -78,8 +78,11 @@ class SearchScreenState extends ConsumerState<SearchScreen> {
 
   Future<void> _fetchData(int index) async {
     if (!mounted) return;
-
+    setState(() {
+      isLoading = true;
+    });
     try {
+      print('fetch from api');
       var result = await fetchApiGET(
           'api/AppData/GetSearchResults/${categories[index]}', null);
 
@@ -99,6 +102,9 @@ class SearchScreenState extends ConsumerState<SearchScreen> {
         });
       }
     }
+    setState(() {
+      isLoading = false;
+    });
   }
 
   List<ProductDto> _parseProducts(List<dynamic> data) {
@@ -161,18 +167,14 @@ class SearchScreenState extends ConsumerState<SearchScreen> {
     setState(() {
       selectedCategory = index;
       categoryName = categories[index];
-      isLoading = true;
     });
     if (!tabContents.containsKey(index)) {
       await _fetchData(index);
-      setState(() {
-        isLoading = false;
-      });
-    } else {
-      setState(() {
-        isLoading = false;
-      });
     }
+  }
+
+  Future<void> _handleRefresh() async {
+    await _fetchData(selectedCategory);
   }
 
   @override
@@ -181,69 +183,72 @@ class SearchScreenState extends ConsumerState<SearchScreen> {
     List<Widget Function()> products = List.generate(
       categories.length,
       (index) => () {
-        return isLoading && !tabContents.containsKey(index)
+        return isLoading || !tabContents.containsKey(index)
             ? const Center(child: CircularProgressIndicator())
             : _buildContentWidget(tabContents[index] ?? [], index);
       },
     );
 
-    return CustomScrollView(
-      controller: _scrollController,
-      slivers: [
-        SliverToBoxAdapter(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Hero(
-                tag: widget.categoryName,
-                child: Center(
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(20),
-                      bottomRight: Radius.circular(20),
-                    ),
-                    child: (bannerImgs[categoryName] ?? '') != ''
-                        ? Opacity(
-                            opacity: scrollProgession < 200
-                                ? 1 - scrollProgession
-                                : 0,
-                            child: Image.network(
-                              bannerImgs[categoryName] ?? '',
-                              width: screenWidth,
-                              height: 200,
-                              fit: BoxFit.cover,
+    return RefreshIndicator(
+      onRefresh: _handleRefresh,
+      child: CustomScrollView(
+        controller: _scrollController,
+        slivers: [
+          SliverToBoxAdapter(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Hero(
+                  tag: widget.categoryName,
+                  child: Center(
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(20),
+                        bottomRight: Radius.circular(20),
+                      ),
+                      child: (bannerImgs[categoryName] ?? '') != ''
+                          ? Opacity(
+                              opacity: scrollProgession < 200
+                                  ? 1 - scrollProgession
+                                  : 0,
+                              child: Image.network(
+                                bannerImgs[categoryName] ?? '',
+                                width: screenWidth,
+                                height: 200,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : const Center(
+                              heightFactor: 5.55,
+                              child: CircularProgressIndicator(),
                             ),
-                          )
-                        : const Center(
-                            heightFactor: 5.55,
-                            child: CircularProgressIndicator(),
-                          ),
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: scrollProgession == 1 ? 25 : 10),
-              Center(
-                child: AnimatedSearchBar(
-                  width: screenWidth - ((1 - scrollProgession) * 50),
-                  accent: Colors
-                      .primaries[selectedCategory % Colors.primaries.length],
-                  onSearch: _handleSearch,
+                SizedBox(height: scrollProgession == 1 ? 25 : 10),
+                Center(
+                  child: AnimatedSearchBar(
+                    width: screenWidth - ((1 - scrollProgession) * 50),
+                    accent: Colors
+                        .primaries[selectedCategory % Colors.primaries.length],
+                    onSearch: _handleSearch,
+                  ),
                 ),
-              ),
-              SizedBox(height: scrollProgession == 1 ? 5 : 10),
-            ],
+                SizedBox(height: scrollProgession == 1 ? 5 : 10),
+              ],
+            ),
           ),
-        ),
-        SliverFillRemaining(
-          child: AnimatedTabWidget(
-            tabs: categories,
-            initialIndex: categories.indexOf(widget.categoryName),
-            tabContentBuilders: products,
-            onTabSelected: _tabSelected,
-            hideTabs: scrollProgession == 1,
+          SliverFillRemaining(
+            child: AnimatedTabWidget(
+              tabs: categories,
+              initialIndex: categories.indexOf(widget.categoryName),
+              tabContentBuilders: products,
+              onTabSelected: _tabSelected,
+              hideTabs: scrollProgession == 1,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

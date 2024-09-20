@@ -10,19 +10,20 @@ class ProductDto {
   int? stockCount;
   double? rating;
   int? ratingCount;
-  ProductDto({
-    this.prdId,
-    this.name,
-    this.isVeg,
-    this.isBestSeller,
-    this.price,
-    this.imageSrl,
-    this.categoryId,
-    this.imgUrl,
-    this.stockCount,
-    this.rating,
-    this.ratingCount,
-  });
+  int? quantity;
+  ProductDto(
+      {this.prdId,
+      this.name,
+      this.isVeg,
+      this.isBestSeller,
+      this.price,
+      this.imageSrl,
+      this.categoryId,
+      this.imgUrl,
+      this.stockCount,
+      this.rating,
+      this.ratingCount,
+      this.quantity});
 }
 
 class CategoryDto {

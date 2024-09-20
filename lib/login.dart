@@ -33,7 +33,6 @@ class LoginScreenState extends State<LoginScreen> {
         _isLoading = false;
       });
       if (response != null && response.containsKey('accessToken')) {
-        response['username'] = userCred['Username'];
         await UserDataHelper.storeUserData(LocalStorageKeys.userCred, response);
         if (!mounted) return;
         Navigator.of(context).pushReplacement(

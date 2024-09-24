@@ -6,6 +6,7 @@ import 'Screens/_4profile.dart';
 import 'Screens/_2search.dart';
 import 'Shared/_globalstate.dart';
 import 'login.dart';
+import './nointernet.dart';
 
 class AppScreen extends ConsumerStatefulWidget {
   const AppScreen({super.key});
@@ -35,18 +36,21 @@ class AppScreenState extends ConsumerState<AppScreen> {
         return HomeScreen(
           callback: screenNavigationCallback,
           logoutCallback: _handleLogout,
+          noInternet: _handleNoInternet,
         );
       case 1:
         return SearchScreen(
           categoryName: category,
           imageUrl: imageUrl,
           logoutCallback: _handleLogout,
+          noInternet: _handleNoInternet,
         );
       case 2:
         return const Center(child: Text('Cart Page'));
       case 3:
         return ProfileScreen(
           logoutCallback: _handleLogout,
+          noInternet: _handleNoInternet,
         );
       default:
         return const Center(child: Text('Home'));
@@ -56,6 +60,12 @@ class AppScreenState extends ConsumerState<AppScreen> {
   void _handleLogout() {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (_) => const LoginScreen()),
+    );
+  }
+
+  void _handleNoInternet() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const NoInternetScreen()),
     );
   }
 

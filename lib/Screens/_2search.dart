@@ -6,16 +6,19 @@ import '../Shared/_animatedtabs.dart';
 import '../Shared/_apimanager.dart';
 import '../Shared/_cardnew.dart';
 import 'package:my_app/Dto/_apiobjects.dart';
+import '../Shared/_networkutils.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   final String categoryName;
   final String imageUrl;
   final Function logoutCallback;
+  final Function noInternet;
 
   const SearchScreen({
     required this.categoryName,
     required this.imageUrl,
     required this.logoutCallback,
+    required this.noInternet,
     super.key,
   });
 
@@ -82,9 +85,17 @@ class SearchScreenState extends ConsumerState<SearchScreen> {
       isLoading = true;
     });
     try {
-      print('fetch from api');
+      bool isConnected = await NetworkUtils.hasInternetConnection();
+      if (!isConnected) {
+        widget.noInternet();
+        return;
+      }
       var result = await fetchApiGET(
           'api/AppData/GetSearchResults/${categories[index]}', null);
+
+      if (result == null) {
+        widget.logoutCallback();
+      }
 
       if (mounted) {
         setState(() {

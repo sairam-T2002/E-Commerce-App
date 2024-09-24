@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'app.dart';
 import 'login.dart';
 import 'Shared/_localstorage.dart';
 import 'nointernet.dart';
+import 'Shared/_networkutils.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -20,13 +20,7 @@ class SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _checkConnectivity() async {
-    var connectivityResults = await (Connectivity().checkConnectivity());
-
-    // Assuming connectivityResults is a List<ConnectivityResult>
-    bool isConnected = connectivityResults.any((result) =>
-        result == ConnectivityResult.mobile ||
-        result == ConnectivityResult.wifi ||
-        result == ConnectivityResult.ethernet);
+    bool isConnected = await NetworkUtils.hasInternetConnection();
 
     if (!isConnected) {
       if (!mounted) return;

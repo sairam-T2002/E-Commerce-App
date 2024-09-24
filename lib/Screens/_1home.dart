@@ -5,11 +5,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../Shared/_globalstate.dart';
 import '../Shared/_cardnew.dart';
 import '../Shared/_slideshow.dart';
+import '../Shared/_networkutils.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   final void Function(int, String, String)? callback;
   final Function logoutCallback;
-  const HomeScreen({super.key, this.callback, required this.logoutCallback});
+  final Function noInternet;
+  const HomeScreen(
+      {super.key,
+      this.callback,
+      required this.logoutCallback,
+      required this.noInternet});
 
   @override
   HomeState createState() => HomeState();
@@ -25,10 +31,14 @@ class HomeState extends ConsumerState<HomeScreen> {
   bool _isLoading = true;
 
   Future<void> updateStateFromApi() async {
-    print('update from api');
     setState(() {
       _isLoading = true;
     });
+    bool isConnected = await NetworkUtils.hasInternetConnection();
+    if (!isConnected) {
+      widget.noInternet();
+      return;
+    }
     Map<String, dynamic>? response =
         await fetchApiGET('api/AppData/GetHomePageData', null);
     if (response == null) {

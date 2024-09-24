@@ -3,8 +3,13 @@ import '../Shared/_localstorage.dart';
 
 class ProfileScreen extends StatefulWidget {
   final Function logoutCallback;
+  final Function noInternet;
 
-  const ProfileScreen({super.key, required this.logoutCallback});
+  const ProfileScreen({
+    super.key,
+    required this.logoutCallback,
+    required this.noInternet,
+  });
 
   @override
   ProfileState createState() => ProfileState();

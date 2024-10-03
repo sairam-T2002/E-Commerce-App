@@ -16,7 +16,7 @@ class NoInternetScreen extends StatelessWidget {
             const Text('No Internet Connection',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            const Text('Please check your internet connection and try again.'),
+            // const Text('Please check your internet connection and try again.'),
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () {

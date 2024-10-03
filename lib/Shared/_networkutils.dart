@@ -6,7 +6,8 @@ class NetworkUtils {
     bool isConnected = connectivityResult.any((result) =>
         result == ConnectivityResult.mobile ||
         result == ConnectivityResult.wifi ||
-        result == ConnectivityResult.ethernet);
+        result == ConnectivityResult.ethernet ||
+        result == ConnectivityResult.vpn);
     return isConnected;
   }
 }

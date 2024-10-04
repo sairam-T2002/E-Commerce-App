@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import '../Shared/_localstorage.dart';
 
-class ProfileScreen extends StatefulWidget {
+class OrdersScreen extends StatefulWidget {
   final Function logoutCallback;
   final Function noInternet;
 
-  const ProfileScreen({
+  const OrdersScreen({
     super.key,
     required this.logoutCallback,
     required this.noInternet,
   });
 
   @override
-  ProfileState createState() => ProfileState();
+  OrdersState createState() => OrdersState();
 }
 
-class ProfileState extends State<ProfileScreen> {
+class OrdersState extends State<OrdersScreen> {
   bool _isLoading = false;
 
   void _logout() async {

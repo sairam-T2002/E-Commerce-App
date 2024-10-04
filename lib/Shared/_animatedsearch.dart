@@ -25,7 +25,7 @@ class AnimatedSearchBarState extends State<AnimatedSearchBar>
   List<String> _hintTexts = [
     'Search',
     'Find products',
-    'Explore categories',
+    'Explore Menu',
     'Discover deals'
   ];
   int _currentHintIndex = 0;
@@ -82,15 +82,14 @@ class AnimatedSearchBarState extends State<AnimatedSearchBar>
   }
 
   // Initialize speech recognition
-  // void _initSpeech() async {
-  //   bool available = await _speech.initialize(
-  //     onStatus: (status) => print('onStatus: $status'),
-  //     onError: (errorNotification) => print('onError: $errorNotification'),
-  //   );
-  //   if (!available) {
-  //     print("The user has denied the use of speech recognition.");
-  //   }
-  // }
+  void _initSpeech() async {
+    bool available = await _speech.hasPermission;
+    if (available) {
+      print("Speech recognition initialized");
+    } else {
+      print("Speech recognition not available");
+    }
+  }
 
   // Listen for speech input
   void _listen() async {
@@ -105,6 +104,13 @@ class AnimatedSearchBarState extends State<AnimatedSearchBar>
               widget.onSearch(_controller.text);
             });
           },
+          listenFor: const Duration(seconds: 30),
+          pauseFor: const Duration(seconds: 5),
+          listenOptions: stt.SpeechListenOptions(
+            partialResults: true,
+            cancelOnError: true,
+            listenMode: stt.ListenMode.confirmation,
+          ),
         );
       }
     } else {
@@ -161,9 +167,15 @@ class AnimatedSearchBarState extends State<AnimatedSearchBar>
                   ),
                   TextField(
                     controller: _controller,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(vertical: 12),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                      suffixIcon: _isListening
+                          ? const Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: CircularProgressIndicator(),
+                            )
+                          : null,
                     ),
                     onChanged: (value) {
                       setState(() {});

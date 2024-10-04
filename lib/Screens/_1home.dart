@@ -423,16 +423,19 @@ class CategoryViewState extends State<CategoryView> {
                       borderRadius: BorderRadius.circular(50),
                     ),
                     child: ClipOval(
-                      child: Image.network(
-                        imageUrl.isNotEmpty
-                            ? imageUrl
-                            : 'https://via.placeholder.com/80',
-                        width: 100,
-                        height: 100,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return const Icon(Icons.error, size: 100);
-                        },
+                      child: Hero(
+                        tag: categoryName,
+                        child: Image.network(
+                          imageUrl.isNotEmpty
+                              ? imageUrl
+                              : 'https://via.placeholder.com/80',
+                          width: 100,
+                          height: 100,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Icon(Icons.error, size: 100);
+                          },
+                        ),
                       ),
                     ),
                   ),

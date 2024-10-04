@@ -2,11 +2,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'Screens/_1home.dart';
-import 'Screens/_4profile.dart';
+import 'Screens/_4orders.dart';
 import 'Screens/_2search.dart';
 import 'Shared/_globalstate.dart';
 import 'login.dart';
 import './nointernet.dart';
+import 'profile.dart';
 
 class AppScreen extends ConsumerStatefulWidget {
   const AppScreen({super.key});
@@ -48,7 +49,7 @@ class AppScreenState extends ConsumerState<AppScreen> {
       case 2:
         return const Center(child: Text('Cart Page'));
       case 3:
-        return ProfileScreen(
+        return OrdersScreen(
           logoutCallback: _handleLogout,
           noInternet: _handleNoInternet,
         );
@@ -136,6 +137,9 @@ class AppScreenState extends ConsumerState<AppScreen> {
 
   void _handleRightActionButton() {
     // Add your right action button logic here
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const Profile()),
+    );
   }
 
   @override
@@ -144,8 +148,8 @@ class AppScreenState extends ConsumerState<AppScreen> {
     final cartCount = cartItems.length;
 
     return Scaffold(
-      appBar: _selectedIndex == 1
-          ? null // Hide AppBar for SearchScreen
+      appBar: _selectedIndex == 1 || _selectedIndex == 2 || _selectedIndex == 3
+          ? null
           : AppBar(
               backgroundColor: const Color.fromARGB(255, 255, 255, 255),
               leadingWidth: 200,
@@ -232,8 +236,8 @@ class AppScreenState extends ConsumerState<AppScreen> {
             label: 'Cart',
           ),
           const BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
+            icon: Icon(Icons.online_prediction_rounded),
+            label: 'Orders',
           ),
         ],
         currentIndex: _selectedIndex,

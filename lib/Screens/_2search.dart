@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:my_app/Shared/_globalstate.dart';
+import '../Shared/_globalstate.dart';
 import '../Shared/_animatedsearch.dart';
 import '../Shared/_animatedtabs.dart';
 import '../Shared/_apimanager.dart';
 import '../Shared/_cardnew.dart';
-import 'package:my_app/Dto/_apiobjects.dart';
+import '../Dto/_apiobjects.dart';
 import '../Shared/_networkutils.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
@@ -113,9 +113,11 @@ class SearchScreenState extends ConsumerState<SearchScreen> {
         });
       }
     }
-    setState(() {
-      isLoading = false;
-    });
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   List<ProductDto> _parseProducts(List<dynamic> data) {

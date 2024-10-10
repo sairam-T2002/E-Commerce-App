@@ -6,133 +6,133 @@ import '../Shared/_globalstate.dart';
 import '../Shared/_cardnew.dart';
 import '../Shared/_slideshow.dart';
 import '../Shared/_networkutils.dart';
+import '../Shared/_cartfloater.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   final void Function(int, String, String)? callback;
-  final Function logoutCallback;
-  final Function noInternet;
-  const HomeScreen(
-      {super.key,
-      this.callback,
-      required this.logoutCallback,
-      required this.noInternet});
+  final VoidCallback logoutCallback;
+  final VoidCallback noInternet;
+
+  const HomeScreen({
+    Key? key,
+    this.callback,
+    required this.logoutCallback,
+    required this.noInternet,
+  }) : super(key: key);
 
   @override
   HomeState createState() => HomeState();
 }
 
 class HomeState extends ConsumerState<HomeScreen> {
-  int i = 0;
   double screenWidth = 0;
   List<String> _labels = [];
   List<Widget> _widgetsListFP = [];
   List<Widget> _widgetsListCT = [];
   List<Widget> _widgetsListCA = [];
   bool _isLoading = true;
-
+  final ScrollController _scrollController = ScrollController();
   Future<void> updateStateFromApi() async {
-    setState(() {
-      _isLoading = true;
-    });
-    bool isConnected = await NetworkUtils.hasInternetConnection();
-    if (!isConnected) {
+    setState(() => _isLoading = true);
+
+    if (!await NetworkUtils.hasInternetConnection()) {
       widget.noInternet();
       return;
     }
-    Map<String, dynamic>? response =
-        await fetchApiGET('api/AppData/GetHomePageData', null);
+
+    final response = await fetchApiGET('api/AppData/GetHomePageData', null);
     if (response == null) {
       widget.logoutCallback();
       return;
     }
-    List<String> tempLbList = [];
-    List<Widget> tempFpList = [];
-    List<Widget> tempCtList = [];
-    List<Widget> tempCaList = [];
-    List<dynamic>? labels = response['label'];
-    List<dynamic>? featuredPd = response['featuredProducts'];
-    List<dynamic>? categories = response['categories'];
-    List<dynamic>? carosel = response['carouselUrls'];
-    String defaultImg = response['defaultSearchBanner'].toString();
-    if (labels != null && labels.length == 3) {
-      tempLbList = labels.cast<String>();
-    }
-    if (featuredPd != null) {
-      for (var item in featuredPd) {
-        tempFpList.add(
-          ProductCardN(
-            product: ProductDto(
-                prdId: item['product_Id'] ?? '',
-                name: item['product_Name'] ?? '',
-                isVeg: item['isVeg'] ?? true,
-                isBestSeller: item['isBestSeller'] ?? false,
-                price: item['price'] ?? 0,
-                imageSrl: 1,
-                categoryId: item['category_Id'] ?? 0,
-                imgUrl: item['image_Url'] ?? '',
-                stockCount: item['stockCount'],
-                rating: double.parse(item['rating'].toString()),
-                ratingCount: int.parse(item['ratingCount'].toString())),
-          ),
-        );
-      }
-    }
-    List<String> globCat = ref.read(categoryProvider);
-    String globImg = ref.read(defaultImgProvider);
-    if (globImg.isEmpty) {
+
+    _processApiResponse(response);
+    setState(() => _isLoading = false);
+  }
+
+  void _processApiResponse(Map<String, dynamic> response) {
+    _labels = (response['label'] as List<dynamic>?)?.cast<String>() ?? [];
+    _widgetsListFP = _createProductWidgets(response['featuredProducts']);
+    _widgetsListCT = _createCategoryWidgets(response['categories']);
+    _widgetsListCA = _createCarouselWidgets(response['carouselUrls']);
+
+    _updateGlobalState(response);
+  }
+
+  List<Widget> _createProductWidgets(List<dynamic>? products) {
+    return products
+            ?.map((item) => ProductCardN(
+                  product: ProductDto(
+                    prdId: item['product_Id'] ?? '',
+                    name: item['product_Name'] ?? '',
+                    isVeg: item['isVeg'] ?? true,
+                    isBestSeller: item['isBestSeller'] ?? false,
+                    price: item['price'] ?? 0,
+                    imageSrl: 1,
+                    categoryId: item['category_Id'] ?? 0,
+                    imgUrl: item['image_Url'] ?? '',
+                    stockCount: item['stockCount'],
+                    rating: double.parse(item['rating'].toString()),
+                    ratingCount: int.parse(item['ratingCount'].toString()),
+                  ),
+                  scoller: _scrollController,
+                ))
+            .toList() ??
+        [];
+  }
+
+  List<Widget> _createCategoryWidgets(List<dynamic>? categories) {
+    return categories
+            ?.map((item) => CategoryView(
+                  screenWidth: screenWidth,
+                  count: categories.length,
+                  callback: widget.callback,
+                  category: {
+                    'categoryId': item?['category_Id']?.toString() ?? '',
+                    'categoryName': item?['category_Name'] ?? '',
+                    'imageurl': item?['image_Url'] ?? ''
+                  },
+                ))
+            .toList() ??
+        [];
+  }
+
+  List<Widget> _createCarouselWidgets(List<dynamic>? carouselUrls) {
+    return carouselUrls
+            ?.map((item) => ClipRRect(
+                  borderRadius: BorderRadius.circular(5),
+                  child: Image.network(
+                    item.isNotEmpty ? item : 'https://via.placeholder.com/80',
+                    width: screenWidth,
+                    height: 300,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        const Icon(Icons.error, size: 100),
+                  ),
+                ))
+            .toList() ??
+        [];
+  }
+
+  void _updateGlobalState(Map<String, dynamic> response) {
+    final defaultImg = response['defaultSearchBanner'].toString();
+    final categories = response['categories'] as List<dynamic>?;
+
+    if (ref.read(defaultImgProvider).isEmpty) {
       ref.read(defaultImgProvider.notifier).setDefaultImg(defaultImg);
     }
-    if (categories != null) {
+
+    final globalCategories = ref.read(categoryProvider);
+    if (globalCategories.isEmpty && categories != null) {
       for (var item in categories) {
-        if (globCat.isEmpty) {
-          ref
-              .read(categoryProvider.notifier)
-              .addToCategory(item?['category_Name'] ?? '');
-        }
-
-        tempCtList.add(CategoryView(
-          screenWidth: screenWidth,
-          count: categories.length,
-          callback: widget.callback,
-          category: {
-            'categoryId': item?['category_Id']?.toString() ?? '',
-            'categoryName': item?['category_Name'] ?? '',
-            'imageurl': item?['image_Url'] ?? ''
-          },
-        ));
+        ref
+            .read(categoryProvider.notifier)
+            .addToCategory(item?['category_Name'] ?? '');
       }
     }
-    if (carosel != null) {
-      for (var item in carosel) {
-        tempCaList.add(
-          ClipRRect(
-            borderRadius: BorderRadius.circular(5),
-            child: Image.network(
-              item.isNotEmpty ? item : 'https://via.placeholder.com/80',
-              width: screenWidth,
-              height: 300,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return const Icon(Icons.error, size: 100);
-              },
-            ),
-          ),
-        );
-      }
-    }
-    setState(() {
-      _labels = tempLbList;
-      _widgetsListFP = tempFpList;
-      _widgetsListCT = tempCtList;
-      _widgetsListCA = tempCaList;
-      _isLoading = false;
-    });
   }
 
-  Future<void> _handleRefresh() async {
-    // This method will be called when the user performs a pull-to-refresh action
-    await updateStateFromApi();
-  }
+  Future<void> _handleRefresh() => updateStateFromApi();
 
   @override
   void initState() {
@@ -143,40 +143,45 @@ class HomeState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     screenWidth = MediaQuery.of(context).size.width;
+    final cartItems = ref.watch(cartProvider);
+
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
-    } else {
-      return RefreshIndicator(
-        onRefresh: _handleRefresh,
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Column(
-            children: [
-              FirstSection(
-                screenWidth: screenWidth,
-                widgetsList: _widgetsListCA,
-                label: _labels[0],
-              ),
-              SecondSection(
-                screenWidth: screenWidth,
-                widgetList: _widgetsListCT,
-                label: _labels[1],
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              ThirdSection(
-                screenWidth: screenWidth,
-                widgetList: _widgetsListFP,
-                label: _labels[2],
-              ),
-            ],
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return Stack(
+      children: [
+        RefreshIndicator(
+          onRefresh: _handleRefresh,
+          child: SingleChildScrollView(
+            controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              children: [
+                FirstSection(
+                    screenWidth: screenWidth,
+                    widgetsList: _widgetsListCA,
+                    label: _labels.isNotEmpty ? _labels[0] : ''),
+                SecondSection(
+                    screenWidth: screenWidth,
+                    widgetList: _widgetsListCT,
+                    label: _labels.length > 1 ? _labels[1] : ''),
+                const SizedBox(height: 10),
+                ThirdSection(
+                    screenWidth: screenWidth,
+                    widgetList: _widgetsListFP,
+                    label: _labels.length > 2 ? _labels[2] : ''),
+                if (cartItems.isNotEmpty)
+                  const SizedBox(
+                      height: 100), // Increased space for the bottom card
+              ],
+            ),
           ),
         ),
-      );
-    }
+        if (cartItems.isNotEmpty)
+          Floater(cart: cartItems, callback: widget.callback),
+      ],
+    );
   }
 }
 
@@ -308,11 +313,12 @@ class ThirdSection extends StatefulWidget {
   final List<Widget> widgetList;
   final String label;
 
-  const ThirdSection(
-      {super.key,
-      required this.screenWidth,
-      required this.widgetList,
-      required this.label});
+  const ThirdSection({
+    super.key,
+    required this.screenWidth,
+    required this.widgetList,
+    required this.label,
+  });
 
   @override
   ThirdSectionState createState() => ThirdSectionState();

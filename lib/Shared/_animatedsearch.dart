@@ -85,10 +85,7 @@ class AnimatedSearchBarState extends State<AnimatedSearchBar>
   void _initSpeech() async {
     bool available = await _speech.hasPermission;
     if (available) {
-      print("Speech recognition initialized");
-    } else {
-      print("Speech recognition not available");
-    }
+    } else {}
   }
 
   // Listen for speech input

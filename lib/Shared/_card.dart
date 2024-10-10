@@ -225,12 +225,12 @@ class ActionsState extends State<CardActions> {
       } else {
         [].add(
           ProductCart(
-            productName: widget.product.name ?? '',
-            productId: widget.product.prdId,
-            price: widget.product.price ?? 0,
-            categoryId: widget.product.categoryId ?? 0,
-            count: 1,
-          ),
+              productName: widget.product.name ?? '',
+              productId: widget.product.prdId,
+              price: widget.product.price ?? 0,
+              categoryId: widget.product.categoryId ?? 0,
+              count: 1,
+              imageUrl: widget.product.imgUrl ?? ''),
         );
       }
     });

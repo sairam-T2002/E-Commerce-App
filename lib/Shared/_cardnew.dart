@@ -7,12 +7,13 @@ import '../Shared/_globalstate.dart';
 class ProductCardN extends ConsumerWidget {
   final ProductDto product;
   final Color accent;
+  final ScrollController? scoller;
 
-  const ProductCardN({
-    super.key,
-    required this.product,
-    this.accent = const Color.fromARGB(255, 243, 65, 33),
-  });
+  const ProductCardN(
+      {super.key,
+      required this.product,
+      this.accent = const Color.fromARGB(255, 243, 65, 33),
+      this.scoller});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -149,9 +150,9 @@ class ProductCardN extends ConsumerWidget {
                         right: 0,
                         child: Center(
                           child: CardActionsN(
-                            product: product,
-                            accent: accent,
-                          ),
+                              product: product,
+                              accent: accent,
+                              scroller: scoller),
                         ),
                       ),
                     ],
@@ -169,7 +170,9 @@ class ProductCardN extends ConsumerWidget {
 class CardActionsN extends ConsumerWidget {
   final ProductDto product;
   final Color accent;
-  const CardActionsN({super.key, required this.product, required this.accent});
+  final ScrollController? scroller;
+  const CardActionsN(
+      {super.key, required this.product, required this.accent, this.scroller});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -181,9 +184,13 @@ class CardActionsN extends ConsumerWidget {
     final cartItem = cartItems.firstWhere(
       (item) => item.productId == product.prdId,
       orElse: () => ProductCart(
-          productName: '', productId: null, price: 0, categoryId: 0, count: 0),
+          productName: '',
+          productId: null,
+          price: 0,
+          categoryId: 0,
+          count: 0,
+          imageUrl: ''),
     );
-
     if (cartItem.count == 0) {
       return SizedBox(
         width: width,
@@ -194,8 +201,18 @@ class CardActionsN extends ConsumerWidget {
                 productName: product.name ?? '',
                 productId: product.prdId,
                 price: product.price ?? 0,
-                categoryId: 0, // Assuming category ID, adjust as needed
+                categoryId: product.categoryId ?? 0,
+                imageUrl: product.imgUrl ?? '',
                 count: 1));
+            Future.delayed(const Duration(milliseconds: 200), () {
+              if (scroller != null) {
+                scroller!.animateTo(
+                  scroller!.position.maxScrollExtent,
+                  duration: const Duration(microseconds: 1),
+                  curve: Curves.easeInOut,
+                );
+              }
+            });
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: backgroundColor,

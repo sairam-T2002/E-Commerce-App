@@ -2,12 +2,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ProductCart {
   String productName;
+  String imageUrl;
   int? productId;
   int price;
   int categoryId;
   int count;
   ProductCart(
       {required this.productName,
+      required this.imageUrl,
       required this.productId,
       required this.price,
       required this.categoryId,
@@ -33,12 +35,12 @@ class CartNotifier extends StateNotifier<List<ProductCart>> {
       for (final product in state)
         if (product.productId == productId)
           ProductCart(
-            productName: product.productName,
-            productId: product.productId,
-            price: product.price,
-            categoryId: product.categoryId,
-            count: newCount,
-          )
+              productName: product.productName,
+              productId: product.productId,
+              price: product.price,
+              categoryId: product.categoryId,
+              count: newCount,
+              imageUrl: product.imageUrl)
         else
           product,
     ];

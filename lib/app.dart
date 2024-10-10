@@ -145,8 +145,7 @@ class AppScreenState extends ConsumerState<AppScreen> {
   @override
   Widget build(BuildContext context) {
     final cartItems = ref.watch(cartProvider);
-    final cartCount = cartItems.length;
-
+    final int cartCount = cartItems.fold(0, (sum, item) => sum + item.count);
     return Scaffold(
       appBar: _selectedIndex == 1 || _selectedIndex == 2 || _selectedIndex == 3
           ? null

@@ -1,4 +1,3 @@
-// AppScreen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'Screens/_1home.dart';
@@ -8,6 +7,10 @@ import 'Shared/_globalstate.dart';
 import 'login.dart';
 import './nointernet.dart';
 import 'profile.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
+import './Shared/_localstorage.dart';
+import './Shared/_apimanager.dart';
 
 class AppScreen extends ConsumerStatefulWidget {
   const AppScreen({super.key});
@@ -19,6 +22,27 @@ class AppScreen extends ConsumerStatefulWidget {
 class AppScreenState extends ConsumerState<AppScreen> {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   int _selectedIndex = 0;
+  GoogleMapController? _mapController;
+  LatLng? _currentLocation;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadConfig();
+  }
+
+  void _loadConfig() async {
+    final config = await fetchApiGET('api/AppData/GetAppConfig', null);
+    if (config != null) {
+      await UserDataHelper.storeUserData(LocalStorageKeys.appConfig, config);
+    }
+  }
+
+  Future<String?> _getGoogleMapsApiKey() async {
+    final apiKeyData =
+        await UserDataHelper.getUserData(LocalStorageKeys.appConfig);
+    return apiKeyData?['googleMapsApiKey'];
+  }
 
   void _onItemTapped(int index) {
     if (_selectedIndex != index) {
@@ -79,7 +103,36 @@ class AppScreenState extends ConsumerState<AppScreen> {
     ));
   }
 
-  void _showDrawer() {
+  Future<void> _getCurrentLocation() async {
+    final permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      await Geolocator.requestPermission();
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // Handle permanently denied permissions
+      return;
+    }
+
+    final position = await Geolocator.getCurrentPosition();
+    setState(() {
+      _currentLocation = LatLng(position.latitude, position.longitude);
+    });
+
+    _mapController?.animateCamera(CameraUpdate.newLatLng(_currentLocation!));
+  }
+
+  void _showDrawer() async {
+    final apiKey = await _getGoogleMapsApiKey();
+    print(apiKey);
+    if (apiKey == null && mounted) {
+      // Handle missing API key
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Google Maps API key not found')),
+      );
+      return;
+    }
+
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -92,8 +145,8 @@ class AppScreenState extends ConsumerState<AppScreen> {
             child: GestureDetector(
               onTap: () {},
               child: DraggableScrollableSheet(
-                initialChildSize: 0.6,
-                minChildSize: 0.2,
+                initialChildSize: 0.9,
+                minChildSize: 0.5,
                 maxChildSize: 0.9,
                 builder: (_, controller) {
                   return Container(
@@ -114,12 +167,43 @@ class AppScreenState extends ConsumerState<AppScreen> {
                           ),
                         ),
                         Expanded(
-                          child: ListView(
-                            controller: controller,
-                            children: const [
-                              ListTile(title: Text('Drawer Item 1')),
-                              ListTile(title: Text('Drawer Item 2')),
-                              ListTile(title: Text('Drawer Item 3')),
+                          child: GoogleMap(
+                            initialCameraPosition: CameraPosition(
+                              target: _currentLocation ?? const LatLng(0, 0),
+                              zoom: 15,
+                            ),
+                            onMapCreated: (GoogleMapController controller) {
+                              _mapController = controller;
+                              _getCurrentLocation();
+                            },
+                            markers: _currentLocation != null
+                                ? {
+                                    Marker(
+                                      markerId:
+                                          const MarkerId('current_location'),
+                                      position: _currentLocation!,
+                                    ),
+                                  }
+                                : {},
+                          ),
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Column(
+                            children: [
+                              TextField(
+                                decoration: InputDecoration(
+                                  labelText: 'Address Line 1',
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                              SizedBox(height: 16),
+                              TextField(
+                                decoration: InputDecoration(
+                                  labelText: 'Address Line 2',
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -136,7 +220,6 @@ class AppScreenState extends ConsumerState<AppScreen> {
   }
 
   void _handleRightActionButton() {
-    // Add your right action button logic here
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => const Profile()),
     );

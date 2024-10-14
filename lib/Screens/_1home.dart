@@ -14,11 +14,11 @@ class HomeScreen extends ConsumerStatefulWidget {
   final VoidCallback noInternet;
 
   const HomeScreen({
-    Key? key,
+    super.key,
     this.callback,
     required this.logoutCallback,
     required this.noInternet,
-  }) : super(key: key);
+  });
 
   @override
   HomeState createState() => HomeState();

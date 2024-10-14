@@ -22,4 +22,5 @@ class UserDataHelper {
 
 class LocalStorageKeys {
   static String userCred = 'user_cred';
+  static String appConfig = 'app_config';
 }

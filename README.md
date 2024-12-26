@@ -70,6 +70,8 @@ flutter pub get
 flutter run
 ```
 
-<!-- ### 📱 Screenshots
+## 📱 Screenshots
 
-[Add your app screenshots here] -->
+| Home Screen                        | Product Details                        | Cart                        |
+| ---------------------------------- | -------------------------------------- | --------------------------- |
+| ![Home Screen](/screenshots/1.png) | ![Product Details](/screenshots/2.png) | ![Cart](/screenshots/3.png) |

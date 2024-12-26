@@ -71,7 +71,6 @@ flutter run
 ```
 
 ## 📱 Screenshots
-
-| Home Screen                        | Product Details                        | Cart                        |
-| ---------------------------------- | -------------------------------------- | --------------------------- |
-| ![Home Screen](/screenshots/1.png) | ![Product Details](/screenshots/2.png) | ![Cart](/screenshots/3.png) |
+/screenshots/1.PNG
+/screenshots/2.PNG
+/screenshots/3.PNG
